@@ -92,10 +92,10 @@
 
 \LoadClass{memoir}
 
-\setlrmarginsandblock{1.2in}{*}{*}
+\setlrmarginsandblock{4cm}{3cm}{*}
   \@tempdima=1in  \advance\@tempdima 25pt \advance\@tempdima\normalbaselineskip
   \@tempdimb=.75in  \advance\@tempdimb 30pt
-\setulmarginsandblock{\@tempdima}{\@tempdimb}{*}
+\setulmarginsandblock{3cm}{*}{1}
 
 \AtBeginDocument{\checkandfixthelayout}
 
@@ -255,7 +255,7 @@
     in \par
     \blocklt{\@field}\par
     in the \par
-    \blocklt{Graduate Division} \par
+    \blocklt{Undergraduate Division} \par
     of the \par
     \blocklt{National University of Singapore} \par
     \vspace{28pt minus 8pt}
