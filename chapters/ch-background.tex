@@ -3,12 +3,13 @@
 \chapter{Background}
 \vspace{2em}
 
+A large portion of the background required to understand this work can be found (and has been reproduced) from OpenAI's Spinning Up in Deep RL~\cite{SpinningUp2018}. What is different in this reproduction, however, is that the background information on DRL has been adapted to fit the ideas and concepts related to map-less navigation found in this work.
+
 - DRL
 - Deep Q networks
 - DDPG
 
 \section{Deep Reinforcement Learning}
-
 Deep reinforcement learning (DRL) is the combination of reinforcement learning and deep learning. This idea of using neural networks for reinforcement learning, however, is not new and can be dated all the way back to Teasauro's TD-Gammon~\cite{tesauro_temporal_nodate}. In the early 2010s, however, the field of deep learning began to find groundbreaking success, particularly in speech recognition~\cite{dahl_context-dependent_2012} and computer vision~\cite{krizhevsky_imagenet_2017}. This success, combined with the advances in computing power, allowed the revival in interest of using deep neural networks as universal function approximators for reinforcement learning - leading to deep reinforcement learning.
 
 Deep reinforcement learning is useful when~\cite{SpinningUp2018}:
@@ -19,22 +20,62 @@ Deep reinforcement learning is useful when~\cite{SpinningUp2018}:
 \end{itemize}
 
 \subsection{Markov Decision Process}
-A Markov Decision Process (MDP) is a mathematical object that describes an agent interacting with a stochastic environment. It is defined by the following components:
+To train our agent with deep reinforcement learning, we must be able to model the relationship between the agent and its environment. A Markov Decision Process (MDP) is a mathematical object that describes our agent interacting with a stochastic environment. It is defined by the following components:
 \begin{itemize}
-\item $S$: \textbf{state space}, a set of states of the environment
-\item $A$: \textbf{action space}, a set of actions, which the agent selects from each timestep (can be discrete or continuous)
-\item $P(r, s' | s, a)$: \textbf{transition probability distribution}. For each state s and action $a$, $P$ specifies the probability that the environment will emit reward $r$ and transition to state $s'$.
+\item $S$: \textbf{state space}, a set of states of the environment. This is the set of inputs for our robot which contain a view of the world (i.e. a stack of laser scans, the current speed of the robot, and the target position with respect to the robot's local frame)
+\item $A$: \textbf{action space}, a set of actions, which the agent selects from each timestep. The actions taken by our robot to reach its target are its linear velocity and angular velocity, both of which are continuous-valued variables
+\item $P(r, s' | s, a)$: \textbf{transition probability distribution}. For each state s and action $a$, $P$ specifies the probability that the environment will emit reward $r$ and transition to state $s'$. This transition function describes the relationship between states, actions, next states, and rewards in an environment.
 \end{itemize}
 
 \subsection{Policies}
-The end goal is to find a policy $\pi$, which gives you a distribution of actions given states. In DRL, we use parameterized policies: policies whose outputs are computable functions that depend on a set of parameters (e.g. the weights and biases of a neural network) which we can adjust to change the behavior via some optimization algorithm~\cite{SpinningUp2018}.
+The end goal is to find a policy $\pi$, which tells the agent what actions to take given a state. In DRL, we use parameterized policies: policies whose outputs are computable functions that depend on a set of parameters (e.g. the weights and biases of a neural network) which we can adjust to change the behavior via some optimization algorithm~\cite{SpinningUp2018}.
 
 We denote the parameters of such a policy by $\theta$, and then write this as a subscript on the policy symbol to highlight the connection:
 
-\begin{align}
+\begin{equation}
 a_{t} \sim \pi_{\theta}(\cdot | s_{t})
-\end{align}
+\end{equation}
 
+\subsection{Reward and Return}
+The reward function $R$ is critically important in reinforcement learning (and specifically for this work). The expected reward tells the agent whether the action it's taking is good or bad. It depends on the current state of the world, the action just taken, and the next state of the world:
+
+\begin{equation}
+r_{t} = R(s_{t}, a_{t}, s_{t+1})
+\end{equation}
+
+The goal of an agent is to maximise the cumulative reward over a trajectory. In this work, the type of return used is called an \textbf{infinite-horizon discounted return}, which is the sum of all rewards ever obtained by the agent, but discounted by how far off in the future they're obtained. This formulation of reward includes a discount factor $\gamma \in (0, 1)$
+
+Specifically (prior to adding the reward feature proposed in this work), this work uses the reward function for map-less navigation proposed in Xie et. al's AsDDPG network~\cite{xie_learning_2018}:
+\begin{equation*}
+Reward, r_{t} = 
+\begin{cases}
+  R_{crash}& \text{if robot crashes},\\   
+  R_{reach}& \text{if robot reaches the goal},\\  
+  \gamma{((d_{t-1} - d_{t})\Delta{t} - C)}& \text{otherwise}.\\  
+\end{cases}
+\end{equation*}
+
+\subsection{The RL Problem}
+The goal of reinforcement learning is to select a policy which maximises \textbf{expected return} when the agent acts according to it. To talk about expected return, we first have to talk about probability distributions over trajectories.
+
+Let’s suppose that both the environment transitions and the policy are stochastic. In this case, the probability of a $T$-step trajectory is:
+\begin{equation}
+P(\tau|\pi) = p_{0}(s_{0}) \prod_{t=0}^{T-1} P(s_{t-1}|s_{t}, a_{t}) \pi(a_{t}|s_{t})
+\end{equation}
+
+The expected return, denoted by $J(\pi)$, is then:
+\begin{equation}
+J(\pi) = \int_{\tau} P(\tau|\pi) R(\tau) = \tau \sim \pi R(\tau)
+\end{equation}
+
+The central optimization problem in RL can then be expressed by:
+\begin{equation}
+\pi^{*} = arg \underset{\pi}{max} J(\pi)
+\end{equation}
+
+with $\pi$ being the optimal policy.
+
+\subsection{Value Functions}
 
 
 
