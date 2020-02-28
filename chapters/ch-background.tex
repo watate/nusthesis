@@ -2,12 +2,9 @@
 
 \chapter{Background}
 \vspace{2em}
+This section provides the background required to understand this work. It is \textit{not intended} for the reader who already has an understanding of Deep Reinforcement Learning and Deep Deterministic Policy Gradient (DDPG).
 
-A large portion of the background required to understand this work can be found (and has been reproduced) from OpenAI's Spinning Up in Deep RL~\cite{SpinningUp2018}. What is different in this reproduction, however, is that the background information on DRL has been adapted to fit the ideas and concepts related to map-less navigation found in this work.
-
-- DRL
-- Deep Q networks
-- DDPG
+We would like to note that a large portion of this section has been reproduced from OpenAI's Spinning Up in Deep RL~\cite{SpinningUp2018}. What is different in this reproduction, however, is that the background information on DRL has been adapted to fit the ideas and concepts related to map-less navigation found in this work.
 
 \section{Deep Reinforcement Learning}
 Deep reinforcement learning (DRL) is the combination of reinforcement learning and deep learning. This idea of using neural networks for reinforcement learning, however, is not new and can be dated all the way back to Teasauro's TD-Gammon~\cite{tesauro_temporal_nodate}. In the early 2010s, however, the field of deep learning began to find groundbreaking success, particularly in speech recognition~\cite{dahl_context-dependent_2012} and computer vision~\cite{krizhevsky_imagenet_2017}. This success, combined with the advances in computing power, allowed the revival in interest of using deep neural networks as universal function approximators for reinforcement learning - leading to deep reinforcement learning.
@@ -37,7 +34,7 @@ a_{t} \sim \pi_{\theta}(\cdot | s_{t})
 \end{equation}
 
 \subsection{Reward and Return}
-The reward function $R$ is critically important in reinforcement learning (and specifically for this work). The expected reward tells the agent whether the action it's taking is good or bad. It depends on the current state of the world, the action just taken, and the next state of the world:
+The reward function $R$ is critically important in reinforcement learning (and specifically for this work). It depends on the current state of the world, the action just taken, and the next state of the world:
 
 \begin{equation}
 r_{t} = R(s_{t}, a_{t}, s_{t+1})
@@ -70,33 +67,158 @@ J(\pi) = \int_{\tau} P(\tau|\pi) R(\tau) = \tau \sim \pi R(\tau)
 
 The central optimization problem in RL can then be expressed by:
 \begin{equation}
-\pi^{*} = arg \underset{\pi}{max} J(\pi)
+\pi^{*} = arg\underset{\pi}{max} J(\pi)
 \end{equation}
 
 with $\pi$ being the optimal policy.
 
 \subsection{Value Functions}
+It's often useful to know the \textbf{value} of a state, or state-action pair. By value, we mean the expected return if you start in
+that state or state-action pair, and then act according to a particular policy forever after. Value functions are used, one way or another, in almost every RL algorithm.
 
+There are four main functions of note:
+\begin{enumerate}
+\item The \textbf{On-Policy Value Function}, $V^{\pi}(s)$, which gives the expected return if you start in a state $s$ and always act according to policy $\pi$:
+	\begin{equation}
+	V^{\pi}(s) = \tau \sim \pi R(\tau)|s_{0} = s
+	\end{equation}
+\item The \textbf{On-Policy Action-Value Function}, $Q^{\pi}(s, a)$, which gives the gives the expected return if you start in state $s$, take an arbitrary action $a$ (which may not have come from the policy), and then forever after act according to policy
+$\pi$:
+	\begin{equation}
+	Q^{\pi}(s, a) = \tau \sim \pi R(\tau)|s_{0} = s, a_{0} = a
+	\end{equation}
+\item The \textbf{Optimal Value Function}, $V^{*}(s)$, which gives the expected return if you start in state $s$ and always act according to the \textit{optimal} policy in the environment
+	\begin{equation}
+	V^{*}(s) = \underset{\pi}{max} \tau \sim \pi R(\tau)|s_{0} = s
+	\end{equation}
+\item The \textbf{Optimal Action-Value Function}, $Q^{*}(s, a)$, which gives the expected return if you start in state $s$, take an arbitrary action $a$, and then forever after act according to the \textit{optimal} policy in the environment:
+	\begin{equation}
+	Q^{*}(s, a) = \underset{\pi}{max} \tau \sim \pi R(\tau)|s_{0} = s, a_{0} = a
+	\end{equation}
+\end{enumerate}
 
+\subsection{The Optimal Q-Function and the Optimal Action}
+There is an important connection between the optimal action-value function $Q^{*}(s, a)$ and the action selected by the optimal policy. By definition, $Q^{*}(s, a)$ gives the expected return for starting in state $s$, taking (arbitrary) action $a$, and then acting according to the optimal policy forever after.
 
+The optimal policy in $s$ will select whichever action maximises the expected return from starting in $s$. As a result, if we have $Q^{*}$, we can directly obtain the optimal action, $a^{*}(s)$, via:
+\begin{equation}
+	a^{*}(s) = \underset{a}{\argmax} Q^{*}(s, a)
+\end{equation}
 
-Attempt at writing it without referring to any documents:
-\section{Deep Learning}
-The 'deep' part of deep learning refers to the idea of using multiple layers for a neural network model. In contrast, "shallow" neural networks only have about 2 layers.
+This connection is important; some RL algorithms learn by improving their policy (thereby directly obtaining "good" actions), whereas others learn by improving their Q-Function (which allows them to determine the best action from a set of actions, indirectly obtaining "good" actions).
 
-How deep learning works is you have a computation graph. The computation graph consists of an input layer, additional layers, as well as an output layer. The input layer is as the name implies, it is the layer where the network receives input and the number of nodes at the input layer is typically defined in terms of the dimensions of the input (e.g. 3-dimensional input would have 3 nodes). The next layers also have nodes where each node is defined as follows: "Nodal value = f(Nodal value from previous layer * weight + bias)" where f is some non-linear function, w is some weight of the connection between the current node and the previous node, and the bias.
+\subsection{Bellman Equations}
+All four of the value functions obey special self-consistency equations called \textbf{Bellman equations}. The basic idea behind the Bellman equations is this:
+\begin{center}
+The value of your starting point is the reward you expect to get from being there, plus the value of wherever you land next.
+\end{center}
 
-The output layer in general also involves some non-linear function. The number of nodes at the output layer also depends on the dimensions of the output.
+The Bellman equations for the on-policy value functions are:
+\begin{equation}
+	V^{\pi}(s) = \underset{\underset{s' \sim P}{a \sim \pi}}{E} [r(s, a) + \gamma V^{\pi}(s')]
+	Q^{\pi}(s, a) = \underset{s' \sim P}{E} [r(s, a) + \gamma \underset{a' \sim \pi}{E}[Q^{\pi}(s', a')]]
+\end{equation}
 
-Weights and biases are updated by optimizing some cost function (non-convex?).
+where $s' \sim P$ is shorthand for $s' \sim P(\cdot|s, a)$, indicating that the next state $s'$ is sampled from the environment's transition rules; $a \sim \pi$ is shorthand for $a \sim \pi(\cdot|s)$; and $a' \sim \pi$ is shorthand for $a' \sim \pi(\cdot|s')$.
 
-Two operations are involved with deep learning: forward propagation and backward propagation. Forward propagation is the process of generating an output based on an input. An input is fed into the computation graph, and as the values pass through the layers and reaches the final layer an output is generated.
+The Bellman equations for the optimal value functions are:
+\begin{equation}
+	V^{*}(s) = \underset{a}{max} \underset{s' \sim P}{E} [r(s, a) + \gamma V^{*}(s')]
+	Q^{*}(s, a) = \underset{s' \sim P}{E} [r(s, a) + \gamma \underset{a'}{max}[Q^{*}(s', a')]]
+\end{equation}
 
-The generated output is compared against a desired output. This is known as supervised learning, where the inputs and outputs of a network are known, and the goal of deep learning is to learn the mapping between those inputs and outputs. The computation graph gets better at producing an output that matches the desired input through backpropagation. Backpropagation begins by calculating the error between the current output and the target (or desired) output. The derivative of this error with respect to the weights and biases of the network is then calculated. The weights and biases are then updated to minimize this error. To explain this, let's think about the derivatives. If the derivative (dError/dWeight) is positive, then a positive change in the weight will result in a positive change in the Error (increase in error). Conversely, if the derivative is negative, then a positive change in the weight will result in a negative change in the Error (decrease in error). Since error is root mean square error (and therefore always positive), a decrease in error will always lead to the minimum value (local or optimal, but never a negative value). The weights are updated based on a learning rate multiplied by the gradient of the error with respect to that weight. 
+The crucial difference between the Bellman equations for the on-policy value functions and the optimal value functions, is the absence or presence of the $max$ over actions. Its inclusion reflects the fact that whenever the agent gets to choose its action, in order to act optimally, it has to pick whichever action leads to the highest value.
 
-As this process occurs over time, the network is said to "fit" or "learn" the data.
+\subsection{Advantage Functions}
+Sometimes in RL, we don't need to describe how good an action is in an absolute sense, but only how much better it is than others on average. That is to say, we want to know the relative \textbf{advantage} of that action. We make this concept precise with the \textbf{advantage function}.
 
-\section{Reinforcement Learning}
+The advantage function $A^{\pi}(s, a)$ corresponding to a policy $\pi$ describes how much better it is to take a specific action $a$ in state $s$, over randomly selecting an action according to $\pi(\cdot|s)$, assuming you act according to $\pi$ forever after. Mathematically, the advantage function is defined by
+\begin{equation}
+A^{\pi}(s, a) = Q^{\pi}(s, a) - V^{\pi}(s)
+\end{equation}
 
-The goal of reinforcement learning is to learn some action, given a state, that maximises the expected reward. The state is represented by the input layer. The input layer captures data about the current state of affairs, and the network goal is to produce an output (which corresponds to action). This works by modelling phenomena as a markov decision process. That is, there is some state transition function that governs the world, and transitions between states occur as a result of actions taken by an agent. This state transition also results in some reward.
+\section{Deep Deterministic Policy Gradient (DDPG)}
+The network presented in this work is a variant of DDPG~\cite{xie_learning_2018}. As such, it is crucial that we also provide a background for what DDPG is, and how it works.
 
+Deep Deterministic Policy Gradient (DDPG) is an algorithm which concurrently learns a Q-function and a policy. It uses off-policy data and the Bellman equation to learn the Q-function, and uses the Q-function to learn the policy.
+
+This approach is closely connected to Q-learning, and is motivated the same way: if you know the optimal action-value function $Q^{*}(s,a)$, then in any given state, the optimal action $a^{*}(s)$ can be found by solving:
+
+\begin{equation}
+a^{*}(s) = \argmax_{a} Q^*(s,a)
+\end{equation}
+
+DDPG interleaves learning an approximator to $Q^*(s,a)$ with learning an approximator to $a^*(s)$, and it does so in a way which is specifically adapted for environments with continuous action spaces. But what does it mean that DDPG is adapted specifically for environments with continuous action spaces? It relates to how we compute the max over actions in $\max_a Q^*(s,a)$.
+
+When there are a finite number of discrete actions, the max poses no problem, because we can just compute the Q-values for each action separately and directly compare them. (This also immediately gives us the action which maximizes the Q-value.) But when the action space is continuous, we can't exhaustively evaluate the space, and solving the optimization problem is highly non-trivial. Using a normal optimization algorithm would make calculating $\max_a Q^*(s,a)$ a painfully expensive subroutine. And since it would need to be run every time the agent wants to take an action in the environment, this is unacceptable.
+
+Because the action space is continuous, the function $Q^*(s,a)$ is presumed to be differentiable with respect to the action argument. This allows us to set up an efficient, gradient-based learning rule for a policy $\mu(s)$ which exploits that fact. Then, instead of running an expensive optimization subroutine each time we wish to compute $\max_a Q(s,a)$, we can approximate it with $\max_a Q(s,a) \approx Q(s,\mu(s))$.
+
+\subsection{Quick Facts}
+\begin{itemize}
+\item DDPG is an off-policy algorithm
+\item DDPG can only be used for environments with continuous action spaces
+\item DDPG can be thought of as being deep Q-learning for continuous action spaces
+\end{itemize}
+
+Next, we'll explain the math behind the two parts of DDPG: learning a Q function, and learning a policy.
+
+\subsection{The Q-Learning Side of DDPG}
+
+First, let's recap the Bellman equation describing the optimal action-value function, $Q^*(s,a)$. It's given by
+
+\begin{equation}
+Q^*(s,a) = \underset{s' \sim P}{E}[r(s, a) + \gamma \max_{a'} Q^*(s', a')]
+\end{equation}
+
+where $s' \sim P$ is shorthand for saying that the next state, $s'$, is sampled by the environment from a distribution $P(\cdot| s, a)$.
+
+This Bellman equation is the starting point for learning an approximator to $Q^*(s,a)$. Suppose the approximator is a neural network $Q_{\phi}(s,a)$, with parameters $\phi$, and that we have collected a set ${\mathcal D}$ of transitions $(s,a,r,s',d)$ (where $d$ indicates whether state $s'$ is terminal). We can set up a mean-squared Bellman error (MSBE) function, which tells us roughly how closely $Q_{\phi}$ comes to satisfying the Bellman equation:
+
+\begin{equation}
+L(\phi, {\mathcal D}) = \underset{(s,a,r,s',d) \sim {\mathcal D}}{{\mathrm E}}\left[
+    \Bigg( Q_{\phi}(s,a) - \left(r + \gamma (1 - d) \max_{a'} Q_{\phi}(s',a') \right) \Bigg)^2
+    \right]
+\end{equation}
+
+Here, in evaluating $(1-d)$, we've used a Python convention of evaluating True to 1 and False to zero. Thus, when d==True---which is to say, when s' is a terminal state---the Q-function should show that the agent gets no additional rewards after the current state.
+
+Q-learning algorithms for function approximators, such as DQN (and all its variants) and DDPG, are largely based on minimizing this MSBE loss function. There are two main tricks employed by all of them which are worth describing, and then a specific detail for DDPG.
+
+\textbf{Trick One: Replay Buffers}. All standard algorithms for training a deep neural network to approximate $Q^*(s,a)$ make use of an experience replay buffer. This is the set ${\mathcal D}$ of previous experiences. In order for the algorithm to have stable behavior, the replay buffer should be large enough to contain a wide range of experiences, but it may not always be good to keep everything. If you only use the very-most recent data, you will overfit to that and things will break; if you use too much experience, you may slow down your learning. This may take some tuning to get right.
+
+\textbf{Trick Two: Target Networks}. Q-learning algorithms make use of target networks. The term
+\begin{equation}
+r + \gamma (1 - d) \max_{a'} Q_{\phi}(s',a')
+\end{equation}
+is called the target, because when we minimize the MSBE loss, we are trying to make the Q-function be more like this target. Problematically, the target depends on the same parameters we are trying to train: $\phi$. This makes MSBE minimization unstable. The solution is to use a set of parameters which comes close to $\phi$, but with a time delay---that is to say, a second network, called the target network, which lags the first. The parameters of the target network are denoted $\phi_{\text{targ}}$.
+
+In DQN-based algorithms, the target network is just copied over from the main network every some-fixed-number of steps. In DDPG-style algorithms, the target network is updated once per main network update by polyak averaging:
+\begin{equation}
+\phi_{\text{targ}} \leftarrow \rho \phi_{\text{targ}} + (1 - \rho) \phi,
+\end{equation}
+where $\rho$ is a hyperparameter between 0 and 1 (usually close to 1).
+
+\textbf{DDPG Detail: Calculating the Max Over Actions in the Target}. As mentioned earlier: computing the maximum over actions in the target is a challenge in continuous action spaces. DDPG deals with this by using a target policy network to compute an action which approximately maximizes $Q_{\phi_{\text{targ}}}$. The target policy network is found the same way as the target Q-function: by polyak averaging the policy parameters over the course of training.
+
+Putting it all together, Q-learning in DDPG is performed by minimizing the following MSBE loss with stochastic gradient descent:
+\begin{equation}
+L(\phi, {\mathcal D}) = \underset{(s,a,r,s',d) \sim {\mathcal D}}{{\mathrm E}}\left[
+    \Bigg( Q_{\phi}(s,a) - \left(r + \gamma (1 - d) Q_{\phi_{\text{targ}}}(s', \mu_{\theta_{\text{targ}}}(s')) \right) \Bigg)^2
+    \right],
+\end{equation}
+
+where $\mu_{\theta_{\text{targ}}}$ is the target policy.
+
+\subsection{The Policy Learning Side of DDPG}
+
+Policy learning in DDPG is fairly simple. We want to learn a deterministic policy $\mu_{\theta}(s)$ which gives the action that maximizes $Q_{\phi}(s,a)$. Because the action space is continuous, and we assume the Q-function is differentiable with respect to action, we can just perform gradient ascent (with respect to policy parameters only) to solve
+\begin{equation}
+\max_{\theta} \underset{s \sim {\mathcal D}}{{\mathrm E}}\left[ Q_{\phi}(s, \mu_{\theta}(s)) \right].
+\end{equation}
+Note that the Q-function parameters are treated as constants here.
+Exploration vs. Exploitation
+
+DDPG trains a deterministic policy in an off-policy way. Because the policy is deterministic, if the agent were to explore on-policy, in the beginning it would probably not try a wide enough variety of actions to find useful learning signals. To make DDPG policies explore better, we add noise to their actions at training time.
+
+At test time, to see how well the policy exploits what it has learned, we do not add noise to the actions.

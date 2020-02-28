@@ -1,0 +1,69 @@
+\SetPicSubDir{ch-Main}
+\SetExpSubDir{ch-Main}
+
+\chapter{Main Text}
+\label{ch:main}
+\vspace{2em}
+
+We would like to reiterate that the main contribution of this work \textit{as a case study} is to \textbf{demonstrate a learning-based approach to smoothing the motion profile of a DRL model}. We do this in the following sequence:
+\begin{enumerate}
+\item Review the mathematics of motion profiles and what "smooth" means
+\item Introduce the network architecture used to demonstrate the effects of this learning-based approach
+\item Discuss the empirical findings of this learning-based approach as well as comparing it with a non-learning based approach
+\end{enumerate}
+
+~\cite{lewin_mathematics_nodate}
+
+\section{Theory and Experiment Setup}
+\subsection{Smooth Motion Profile}
+In map-less navigation (as well as in many other applications), we deal with point-to-point motion. That is, the goal of the robot is to move from its starting position and reach some target end position while avoiding obstacles. In terms of motion, point-to-point means that from a stop (zero velocity), the load is accelerated to a constant velocity, and then decelerated such that the final acceleration, and velocity, are zero at the moment the load arrives at the programmed destination. However, achieveing fast motions without residual vibration is a challenge that pervades many applications of point-to-point motion~\cite{meckl_optimized_1998}, including deep reinforcement learning for map-less navigation.
+
+To perform point-to-point motion with minimal vibration, previous works have focused on optimization of the motion profile itself~\cite{meckl_optimized_1998}. For example, ~\autoref{main:fig:motion_profile_1} shows a comparison between a typical trapezoidal motion profile and an (improved) S-curve motion profile. 
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=.9\linewidth]{\Pic{png}{motion_profile_1}}
+  \vspace{\BeforeCaptionVSpace}
+  \caption{Comparison of Trapezoidal and S-Cruve Motion Profiles. Image from Meckl & Arestides, 1998~\cite{meckl_optimized_1998}.}
+  \label{main:fig:motion_profile_1}
+\end{figure}
+\newpage
+
+As can be seen from ~\autoref{main:fig:motion_profile_1}, smoothing a motion profile involves jerk reduction (or some manipulation of the jerk profile). Jerk is the time-derivative of acceleration, that is:
+\begin{equation}
+j(t) = \frac{da(t)}{dt} = \frac{d^2 v(t)}{dt^2}
+\end{equation}
+
+\subsection{Network Architecture}
+The network architecture we use is largely similar to Xie et. al's AsDDPG network~\cite{xie_learning_2018}. The difference, however, is that we have discarded the convolutional neural network (CNN) layers and used a sparser laser beam to allow the agent to learn the policy faster. We reiterate: the goal here is not to produce a state-of-the-art model for map-less navigation, but to empirically study a learning-based approach to jerk reduction.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=.9\linewidth]{\Pic{png}{network_architecture}}
+  \vspace{\BeforeCaptionVSpace}
+  \caption{Network architecture. Network layers are demonstrated by rectangles. Orange arrows indicate the connectivity between network layers and some other components, e.g. input state and the output of the simple controller. Blue arrows indicate the operation of concatenation (i.e. tf.concat). The final action is selected based on the Q-value predicted by the critic-DQN.}
+  \label{main:fig:network_architecture}
+\end{figure}
+\newpage
+
+The network from ~\autoref{main:fig:network_architecture} consists of two parts:
+\begin{enumerate}
+\item \textbf{Policy network and assistive controller (red)}: The policy network consists of a fully-connected layers which estimates the optimal linear and angular velocities for the robot based only on the input state (i.e., laser scans, current speed, and target position in the local frame). This is a very important feature of DDPG as sampling actions from a policy is computationally less expensive than exhaustively evaluating as many discrete actions as possible (since our action space is continuous). Note that the activation functions of the outputs of the policy are sigmoid (linear velocity) and tanh (angular velocity), respectively. 
+\item \textbf{Augmented critic network (green)}: The critic-DQN is also constructed with fully-connected layers. It has two branches: one is the critic branch where the action is concatenated into the second layer; the other is the DQN branch where (similar to Xie et. al~\cite{xie_learning_2018}) we apply dueling and double network architecture to speed up training and avoid overestimation. Note that there is no nonlinear activation for its output layers.
+\end{enumerate}
+
+Additional (more specific) details related to the critic-DQN implementation as well as the AsDDPG network can be found in Xie et. al's paper~\cite{xie_learning_2018}.
+
+\section{Experimental Work}
+\subsection{Training Methodology}
+Our network from ~\autoref{main:fig:network_architecture} was trained in 3 different Stage simulation worlds~\ref{appsec:blank_world},~\ref{appsec:simple_world},~\ref{appsec:complex_world}. In each simulation world, the network was trained until the average performance reaches a plateau (gradient of average performance with respect to time is roughly zero).
+
+Here, average performance of the network is obtained according to~\autoref{main:eq:average_performance}:
+\begin{equation}
+\text{Average Performance} = \underset{Ep \sim (100 Eps)}{\mathrm E}\bigg[\underset{(s, a) \sim Ep}{\mathrm E} \big(\underset{a \sim \pi}{\max} Q^{\pi}(s, a)\big)\bigg]
+\label{main:eq:average_performance}
+\end{equation}
+
+
+
+\section{Results and Discussion}
