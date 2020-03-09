@@ -92,10 +92,12 @@
 
 \LoadClass{memoir}
 
-\setlrmarginsandblock{4cm}{3cm}{*}
+%\setlrmarginsandblock{4cm}{3cm}{*}
+\setlrmarginsandblock{1.2in}{*}{*}
   \@tempdima=1in  \advance\@tempdima 25pt \advance\@tempdima\normalbaselineskip
   \@tempdimb=.75in  \advance\@tempdimb 30pt
-\setulmarginsandblock{3cm}{*}{1}
+\setulmarginsandblock{\@tempdima}{\@tempdimb}{*}
+%\setulmarginsandblock{3cm}{*}{1}
 
 \AtBeginDocument{\checkandfixthelayout}
 
