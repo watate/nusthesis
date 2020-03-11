@@ -5,11 +5,11 @@
 \label{ch:main}
 \vspace{2em}
 
-We would like to reiterate that the main contribution of this work as a case study is to \textbf{demonstrate a learning-based approach to smoothing the motion profile of a DRL model}. We do this in the following sequence:
+The main contribution of this work is to \textbf{demonstrate a learning-based approach to smoothing the motion profile of a DRL model}. We do this in the following sequence:
 \begin{enumerate}
 \item Introduce the idea of "smooth" motion profiles
 \item Present the network architecture used to apply this learning-based approach
-\item Discuss the empirical findings of this learning-based approach as well as comparing it with a non-learning based approach
+\item Discuss the empirical findings of this learning-based approach as well as compare it with a non-learning based approach
 \end{enumerate}
 
 \section{Smooth Motion Profile}
@@ -21,7 +21,7 @@ To perform point-to-point motion with minimal vibration, previous works have foc
   \centering
   \includegraphics[width=.9\linewidth]{\Pic{png}{motion_profile_1}}
   \vspace{\BeforeCaptionVSpace}
-  \caption{Comparison of Trapezoidal and S-Cruve Motion Profiles. Image from Meckl and Arestides, 1998~\cite{meckl_optimized_1998}}
+  \caption{Comparison of Trapezoidal and S-Curve Motion Profiles. Image from Meckl and Arestides, 1998~\cite{meckl_optimized_1998}}
   \label{main:fig:motion_profile_1}
 \end{figure}
 
@@ -32,6 +32,7 @@ j(t) = \frac{da(t)}{dt} = \frac{d^2 v(t)}{dt^2}
 
 \section{Proposed Approach}
 \subsection{Three Different Models}
+\label{main:sec:3_models}
 In this work, we compare the motion profiles of the following three models:
 \begin{enumerate}
 \item \textbf{Normal Model}: The default end-to-end neural network trained with deep reinforcement learning to perform map-less navigation
@@ -39,7 +40,8 @@ In this work, we compare the motion profiles of the following three models:
 \item \textbf{Model with Jerk-Learning}: A network very similar to Normal Model but with an added reward function that penalizes the robot for the jerk generated. The inputs of this model are also slightly different (for the reward function to work properly).
 \end{enumerate}
 
-\subsection{State and Action}
+\subsection{State}
+\label{main:sec:state}
 \textit{Normal Model} and \textit{Model with Jerk-Learning} have different features included in their inputs (states) but they both have the same output (action).
 
 At a certain time step $t$, the state of the agent (robot) trained with \textit{Normal Model} is described by:
@@ -58,21 +60,33 @@ In the \textit{Model with Jerk-Learning}, the acceleration and jerk of the robot
 \item x and y components of the robot's displacement from its target position ($d_{x,t}, d_{y,t}$)
 \end{itemize}
 
-For their actions, both models output a linear and angular velocity for the robot/agent to perform.
+\subsection{Action}
+For all 3 models, the output (action) is a linear velocity ($v_t$) and an angular velocity ($\omega_{t}$). However, the action for the \textit{Normal Model with Velocity Smoother} is slightly different as it is constrained by a simple velocity smoother. In this work, we use the following algorithm for simple velocity smoothing:
+
+\begin{algorithm}
+\caption{Simple Velocity Smoother}
+\label{main:simple_v_smoother}
+\If{Target Velocity < Control Velocity}{Control Velocity = $\min$(Target Velocity, Control Velocity + $v_c$)}
+\ElseIf{Target Velocity > Control Velocity}{Control Velocity = $\max$(Target Velocity, Control Velocity - $v_c$)}
+\Else{Control Velocity = Target Velocity}
+\end{algorithm}
+
+Essentially, ~\autoref{main:simple_v_smoother} is an acceleration limiting approach to motion control where a maximum acceleration is assumed. This generates a trapezoidal motion profile similar to ~\autoref{main:fig:motion_profile_1}. 
 
 \subsection{Simulation Setup}
 To enable the DRL agent to learn from trial and error, we use a simple robot simulation environment called Stage. Stage provides a virtual world populated by mobile robots and sensors, along with various objects for the robots to sense and manipulate. We use Stage in ROS (Robot Operating System) to train our DRL agent~\cite{gerkey_playerstage_nodate}.
 
 \subsection{Reward Function}
 The reward function, $r(s, a)$, serves as a training signal to encourage or discourage behaviours in the context of a desired task~\cite{zhu_safe_2019}. Thus, the features chosen for the reward function must capture the relevant objectives of the task. In this work, the following reward function was used for the \textit{Normal Model}:
-\begin{equation*}
+\begin{equation}
 Reward, r_{t} = 
 \begin{cases}
-  -5& \text{if robot crashes},\\   
-  5& \text{if robot reaches the goal},\\  
-  \gamma{\bigg((d_{t-1} - d_{t})\Delta{t} - C\bigg)}& \text{otherwise}.\\ 
+  -5& \text{if robot crashes},\\
+  5& \text{if robot reaches the goal},\\
+  \gamma{\bigg((d_{t-1} - d_{t})\Delta{t} - C\bigg)}& \text{otherwise}.
+  \\
 \end{cases}
-\end{equation*}
+\end{equation}
 Where:
 \begin{itemize}
 \item $\gamma$ acts as a discount factor (for infinite-horizon discounted return)
@@ -81,17 +95,19 @@ Where:
 \item C is a constant used as a time penalty.
 \end{itemize}
 
-Note that the policy learnt with this reward function may be \textit{sub}-optimal. This is due to the fact that the agent is driven by something else other than reaching the target in the shortest time possible (i.e. the dense reward function with a discount factor $\gamma$). Ideally, a sparse reward function would be better as it would only reward the robot when it actually reaches the target; however, a sparse reward function is challenging for random exploration.
+Note that the policy learnt with this reward function may be \textit{sub}-optimal. This is due to the fact that the agent is driven by something else other than reaching the target in the shortest time possible. Ideally, a sparse reward function would be better as it would only reward the robot when it actually reaches the target; however, a sparse reward function is challenging for random exploration.
 
 For the \textit{Model with Jerk-Learning}, a new feature which penalizes the robot for jerky movements is added to the reward function. We have chosen to use a dense penalty function for the new feature as it would alleviate the challenges of learning the appropriate motion profile to minimize jerk:
-\begin{equation*}
+\begin{equation}
 Reward, r_{t} = 
 \begin{cases}
-  -5& \text{if robot crashes},\\   
+  -5& \text{if robot crashes},\\ 
   5& \text{if robot reaches the goal},\\
-  \gamma{\bigg((d_{t-1} - d_{t})\Delta{t} - C\bigg)} - \gamma{j_{t}} - \frac{\gamma}{25} \Bigg(\bigg(\frac{j_{t}}{\max{j_{t}}}\bigg)^{2} + \bigg(\frac{\zeta_{t}}{\max{\zeta{t}}}\bigg)^2\Bigg)& \text{otherwise}.\\  
+  \gamma{\bigg((d_{t-1} - d_{t})\Delta{t} - C\bigg)} -\\
+  \frac{\gamma}{25} \Bigg(\bigg(\frac{j_{t}}{\max{j_{t}}}\bigg)^{2} + \bigg(\frac{\zeta_{t}}{\max{\zeta{t}}}\bigg)^2\Bigg)& \text{otherwise}.
+  \\  
 \end{cases}
-\end{equation*}
+\end{equation}
 Where:
 \begin{itemize}
 \item $j_t$ is linear jerk at time $t$
@@ -101,7 +117,7 @@ Where:
 \end{itemize}
 
 \subsection{Network Architecture}
-The network architecture we use is largely similar to Xie et. al's AsDDPG network~\cite{xie_learning_2018}. The difference, however, is that we have discarded the convolutional neural network (CNN) layers and used a sparser laser beam to allow the agent to learn the policy faster. We reiterate: the goal here is not to produce a state-of-the-art model for map-less navigation, but to empirically study a learning-based approach to jerk reduction.
+The network architecture we use is largely similar to Xie et. al's Assisted DDPG network~\cite{xie_learning_2018}. The difference, however, is that we have discarded the convolutional neural network (CNN) layers and used a sparser laser beam to allow the agent to learn the policy faster. We reiterate: the goal here is not to produce a state-of-the-art model for map-less navigation, but to empirically study a learning-based approach to jerk reduction. ~\autoref{main:fig:network_architecture} shows the network architecture of the \textit{Normal Model}.
 
 \begin{figure}[h]
   \centering
@@ -110,18 +126,53 @@ The network architecture we use is largely similar to Xie et. al's AsDDPG networ
   \caption{Network architecture. Network layers are demonstrated by rectangles. Orange arrows indicate the connectivity between network layers and some other components, e.g. input state and the output of the simple controller. Blue arrows indicate the operation of concatenation (i.e. tf.concat). The final action is selected based on the Q-value predicted by the critic-DQN.}
   \label{main:fig:network_architecture}
 \end{figure}
-\newpage
 
-The network from ~\autoref{main:fig:network_architecture} consists of two parts:
+The network architecture of ~\autoref{main:fig:network_architecture} consists of two parts:
 \begin{enumerate}
 \item \textbf{Policy network and assistive controller (red)}: The policy network consists of a fully-connected layers which estimates the optimal linear and angular velocities for the robot based only on the input state (i.e., laser scans, current speed, and target position in the local frame). This is a very important feature of DDPG as sampling actions from a policy is computationally less expensive than exhaustively evaluating as many discrete actions as possible (since our action space is continuous). Note that the activation functions of the outputs of the policy are sigmoid (linear velocity) and tanh (angular velocity), respectively. 
 \item \textbf{Augmented critic network (green)}: The critic-DQN is also constructed with fully-connected layers. It has two branches: one is the critic branch where the action is concatenated into the second layer; the other is the DQN branch where (similar to Xie et. al~\cite{xie_learning_2018}) we apply dueling and double network architecture to speed up training and avoid overestimation. Note that there is no nonlinear activation for its output layers.
 \end{enumerate}
 
+The network architecture of the \textit{Model with Jerk-Learning} is slightly different in terms of its inputs (as mentioned in ~\autoref{main:sec:state}). It is shown in ~\autoref{main:fig:network_architecture_jerk}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=.9\linewidth]{\Pic{png}{network_architecture_jerk}}
+  \vspace{\BeforeCaptionVSpace}
+  \caption{Network architecture of Model with Jerk-Learning. Input layer now includes stacks of velocities, accelerations, and jerks of the robot.}
+  \label{main:fig:network_architecture_jerk}
+\end{figure}
+
+
 \subsection{Training Methodology}
+The training procedure of both networks is according to ~\autoref{main:training_procedure} ~\cite{xie_learning_2018}.
+\begin{algorithm}
+\caption{Assisted DDPG}
+\label{main:training_procedure}
+Initialize $A(s, a|\theta^A), Q(s, \sigma|\theta^Q),$ and $\pi(s, \theta^\pi)$\;
+Initialize target network $\theta^{A'}, \theta^{Q'},$ and $\theta^{\pi'}$\;
+Initialize replay buffer $R$ and exploration noise $\epsilon$\;
+\While{Episode is not terminal}{
+  Reset the environment\;
+  Obtain the initial observation\;
+  \For{step = 1}{
+    Infer switching $[Q_{policy}, Q_P] = Q(s_t, \sigma|\theta^Q)$
+    $\sigma_t = \argmax([Q_{policy}, Q_P])$
+    \If{$\sigma_t == 1$}{Sample policy action $a_t = \pi(s_t|\theta^\pi) + \epsilon$}
+    \Else{Sample action $a_t$ from external controller}
+    Execute $a_t$ and obtain $r_t, s_{t+1}$\;
+    Store transition ($s_t, a_t, r_t, s_{t+1}, \sigma_t$) in R\;
+    Sample N transitions ($s_i, a_i, r_i, s_{i+1}, \sigma_i$) in R\;
+    Optimize critic-DQN by minimizing loss function\;
+    Update policy\;
+    Update target networks\;
+  }}
+\end{algorithm}
+\newpage
+
 Our network from ~\autoref{main:fig:network_architecture} was trained in 3 different Stage simulation worlds~\ref{appsec:blank_world},~\ref{appsec:simple_world},~\ref{appsec:complex_world}. In each simulation world, the network was trained until the average performance reaches a plateau (i.e. when gradient of average performance with respect to time is approximately zero).
 
-Here, average performance of the network is obtained according to~\autoref{main:eq:average_performance}. To our knowledge, this equation has not been explicitly mentioned in the literature; however, our understanding is that this is what is typically meant by average performance in the mapless navigation literature.
+Here, average performance of the network is obtained according to~\autoref{main:eq:average_performance}. To our knowledge, ~\autoref{main:eq:average_performance} has not been explicitly mentioned in the literature; however, our understanding is that this is what is typically meant by average performance in the mapless navigation literature ~\cite{xie_learning_2018}.
 \begin{equation}
 \text{Average Performance} = \underset{Ep \sim (100 Eps)}{\mathrm E}\bigg[\underset{(s, a) \sim Ep}{\mathrm E} \big(\underset{a \sim \pi}{\max} Q^{\pi}(s, a)\big)\bigg]
 \label{main:eq:average_performance}
@@ -129,7 +180,15 @@ Here, average performance of the network is obtained according to~\autoref{main:
 
 
 \section{Experiment Results}
+In this section, we discuss and compare the results of training the 3 different models mentioned in ~\autoref{main:sec:3_models}. We do this by looking at:
+\begin{enumerate}
+\item \textbf{Average Performance over Time}: How fast does the model learn? How well does it perform in the end?
+\item \textbf{Average Jerk over Time}: Does the jerk penalty lead to a smoother motion profile than using a simple velocity smoother?
+\item \textbf{Motion Profile}: What motion profile does the trained model generate? Trapezoidal or S-Curve?
+\end{enumerate}
 
-
+\subsection{Average Performance over Time}
+\subsection{Average Jerk over Time}
+\subsection{Motion Profile}
 
 \section{Discussion}
