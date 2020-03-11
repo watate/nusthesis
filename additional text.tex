@@ -1,3 +1,13 @@
+\begin{algorithm}
+\caption{Simple Velocity Smoother}
+\label{main:simple_v_smoother}
+\If{Target Velocity < Control Velocity}{Control Velocity = $\min(Target Velocity, Control Velocity + v_c)$}
+\ElseIf{Target Velocity > Control Velocity}{Control Velocity = $\max(Target Velocity, Control Velocity - v_c)$}
+\Else{Control Velocity = Target Velocity}
+\end{algorithm}
+
+Essentially, ~\autoref{main:simple_v_smoother} is an acceleration limiting approach to motion control where a maximum acceleration is assumed. This generates a trapezoidal motion profile similar to ~\autoref{main:fig:motion_profile_1}. 
+
 \subsection{Map-less Navigation Problem}
 The map-less navigation problem can be formulated as follows~\cite{xie_learning_2018}:
 

@@ -11,8 +11,8 @@ set -o pipefail
 export TEX_NAME="main"
 
 # Name of the output .pdf file
-#export PDF_NAME="ChickenR"
-export PDF_NAME="Thesis_Electronic"
+export PDF_NAME="ChickenR"
+#export PDF_NAME="Thesis_Electronic"
 #export PDF_NAME="Thesis_Print"
 
 # Name of the .bib file used as the parameter to \bibliography{}

@@ -245,23 +245,24 @@
 
   \begin{center}
     \blocklt{\@title}\par
-    \vspace{14pt minus 4pt}
-    by \par
+    %\vspace{14pt minus 4pt}
+    \vspace{28pt minus 8pt}
+    Submitted by \par
     \blocklt{\@author}
     \ifdefined \@prevdegrees
       \par\vspace{-10pt}\textit{(\@prevdegrees)}
     \fi\par
     \vspace{28pt minus 8pt}
-    \blocklt{A thesis submitted for the degree of} \par
-    \blocklt{\@degree}\par
-    in \par
-    \blocklt{\@field}\par
-    in the \par
-    \blocklt{Undergraduate Division} \par
-    of the \par
-    \blocklt{National University of Singapore} \par
+    Department of\\
+    Mechanical Engineering
+    \par
     \vspace{28pt minus 8pt}
-    \blocklt{\@degreeyear} \par
+    In partial fulfilment of the\\
+    requirements for the Degree of\\ 
+    Bachelor of Engineering\\
+    National University of Singapore \par
+    \vspace{28pt minus 8pt}
+    Session 2019/2020 \par
     \vspace{14pt minus 4pt}
     \ifdefined \@cosupervisor
       Supervisors: \par\vspace{-10pt}
