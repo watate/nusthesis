@@ -183,14 +183,14 @@ In this section, we discuss and compare the results of training the 3 different 
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=.9\linewidth]{\Pic{png}{paper_Simple World_Success Rate_lineraw}}
+  \includegraphics[width=.9\linewidth]{\Pic{png}{paper_Simple World_Performance_Raw_line}}
   \vspace{\BeforeCaptionVSpace}
-  \caption{Graph of Episode Result vs Time. Episode result is 1 if the agent successfully reaches the target, and 0 if it fails.}
+  \caption{Graph of Performance vs Time (Raw).}
   \label{main:visualization_difficulty_1}
 \end{figure}
 \newpage
 
-It is difficult to see how well the model is performing over time from ~\autoref{main:visualization_difficulty_1} because the agent constantly alternates between success and failure. Therefore, we have chosen to use an exponentially weighted moving average (EWMA) to better visualize how the agent's performance is improving over time (as well as other variables which we will look at in this work). EWMA is calculated as follows:
+It is difficult to see how well the model is performing over time from ~\autoref{main:visualization_difficulty_1} purely based on the raw results. Therefore, we have chosen to use an exponentially weighted moving average (EWMA) to better visualize how the agent's performance is improving over time (as well as other variables which we will look at in this work). EWMA is calculated as follows:
 \begin{equation}
 y(t) = \frac{x_t + (1-\alpha)x_{t-1} + (1-\alpha)^{2}x_{t-2} + ... + (1-\alpha)^{t}x_0}{1 + (1-\alpha) + (1-\alpha^2) + ... + (1-\alpha)^t}
 \end{equation}
@@ -202,19 +202,19 @@ Where:
 \item $\alpha$ is the smoothing factor.
 \end{itemize}
 
-While it is possible to pass $\alpha$ directly, it's often easier to think about the span of an EW moment. In this work, unless otherwise specified, we use a span of 1000. This is also known as an "N-day EW moving average". That is:
+While it is possible to pass $\alpha$ directly, it's often easier to think about the span of an EW moment. In this work, unless otherwise specified, we use a span of 1000 for our smoothed results. This is also known as an "N-day EW moving average". That is:
 \begin{equation}
 \alpha = \frac{2}{s + 1} \text{ for span s $\geq$ 1}
 \end{equation}
 
 
-Using EWMA, our graph of episode result vs time is now transformed into a graph of success rate vs time:
+Using EWMA, our graph of performance vs time is now smoothened and we are able to see the long-term trends:
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=.9\linewidth]{\Pic{png}{paper_Simple World_Success Rate_linesmoothed}}
+  \includegraphics[width=.9\linewidth]{\Pic{png}{paper_Simple World_Performance_Smooth_line}}
   \vspace{\BeforeCaptionVSpace}
-  \caption{Graph of Success Rate vs Time.}
+  \caption{Graph of Performance vs Time (Smooth).}
   \label{main:visualization_difficulty_2}
 \end{figure}
 
@@ -233,15 +233,44 @@ In this work, we measure performance as the return of a trajectory (which is a m
 \text{Performance} = R(\tau) = \sum^{\infty}_{t=0} \gamma^{t} r_t
 \end{equation}
 
-~\autoref{main:performance_1} shows that all 3 models display performance improvements at approximately equal rates. 
+~\autoref{main:performance_1} and ~\autoref{main:performance_2} show that all 3 models display performance improvements at approximately equal rates. All 3 models also plateau at roughly the same performance level. We also observe that the \textit{Model with Jerk-Learning} generally outperforms the \textit{Model with Velocity Smoother}.
 \begin{figure}[h]
   \centering
-  \includegraphics[width=.9\linewidth]{\Pic{png}{paper_Simple World_Success Rate_linesmoothed}}
+  \includegraphics[width=.9\linewidth]{\Pic{png}{paper_Simple World_Performance_Smooth_line}}
   \vspace{\BeforeCaptionVSpace}
-  \caption{Average Performance vs Time}
+  \caption{Performance vs Time (Simple World)}
   \label{main:performance_1}
 \end{figure}
 
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=.9\linewidth]{\Pic{png}{paper_Complex World_Performance_Smooth_line}}
+  \vspace{\BeforeCaptionVSpace}
+  \caption{Performance vs Time (Simple World)}
+  \label{main:performance_2}
+\end{figure}
+
+~\autoref{main:performance_3} and ~\autoref{main:performance_4} show that all 3 models display improvements in success rate at approximately equal rates. All 3 models also end up plateuing at the same success rate. Again, we observe that the \textit{Model with Jerk-Learning} generally outperforms the \textit{Model with Velocity Smoother}.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=.9\linewidth]{\Pic{png}{paper_Simple World_Success Rate_Smooth_line}}
+  \vspace{\BeforeCaptionVSpace}
+  \caption{Success Rate vs Time (Simple World)}
+  \label{main:performance_3}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=.9\linewidth]{\Pic{png}{paper_Complex World_Success Rate_Smooth_line}}
+  \vspace{\BeforeCaptionVSpace}
+  \caption{Success Rate vs Time (Simple World)}
+  \label{main:performance_4}
+\end{figure}
+
 \subsection{Motion Profile of Models}
+
+
+
 
 \section{Discussion}
