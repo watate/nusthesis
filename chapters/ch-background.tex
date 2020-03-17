@@ -181,7 +181,7 @@ L(\phi, {\mathcal D}) = \underset{(s,a,r,s',d) \sim {\mathcal D}}{{\mathrm E}}\l
     \right]
 \end{equation}
 
-Here, in evaluating $(1-d)$, we've used a Python convention of evaluating True to 1 and False to zero. Thus, when d==True---which is to say, when s' is a terminal state---the Q-function should show that the agent gets no additional rewards after the current state.
+Here, in evaluating $(1-d)$, we've used a Python convention of evaluating True to 1 and False to 0. Thus, when $d ==$ True---which is to say, when s' is a terminal state---the Q-function should show that the agent gets no additional rewards after the current state.
 
 Q-learning algorithms for function approximators, such as DQN (and all its variants) and DDPG, are largely based on minimizing this MSBE loss function. There are two main tricks employed by all of them which are worth describing, and then a specific detail for DDPG.
 
