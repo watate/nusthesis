@@ -204,7 +204,7 @@ Where:
 
 While it is possible to pass $\alpha$ directly, it's often easier to think about the span of an EW moment. In this work, unless otherwise specified, we use a span of 1000. This is also known as an "N-day EW moving average". That is:
 \begin{equation}
-\alpha = \frac{2}{s + 1}& \text{for span s $\geq$ 1}
+\alpha = \frac{2}{s + 1} \text{ for span s $\geq$ 1}
 \end{equation}
 
 
@@ -225,10 +225,23 @@ Using EWMA, our graph of episode result vs time is now transformed into a graph 
 % \item \textbf{Motion Profile}: What motion profile does the trained model generate? Trapezoidal or S-Curve?
 % \end{enumerate}
 
-\subsection{Average Performance over Time}
-For all 3 models, 
+\subsection{Performance of Models}
+In this work, we measure performance as the return of a trajectory (which is a measure of cumulative reward along the trajectory). The way this is computed is according to ~\autoref{main:eq:performance}:
 
-\subsection{Average Jerk over Time}
-\subsection{Motion Profile}
+\begin{equation}
+\label{main:eq:performance}
+\text{Performance} = R(\tau) = \sum^{\infty}_{t=0} \gamma^{t} r_t
+\end{equation}
+
+~\autoref{main:performance_1} shows that all 3 models display performance improvements at approximately equal rates. 
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=.9\linewidth]{\Pic{png}{paper_Simple World_Success Rate_linesmoothed}}
+  \vspace{\BeforeCaptionVSpace}
+  \caption{Average Performance vs Time}
+  \label{main:performance_1}
+\end{figure}
+
+\subsection{Motion Profile of Models}
 
 \section{Discussion}
