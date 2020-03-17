@@ -36,7 +36,7 @@ j(t) = \frac{da(t)}{dt} = \frac{d^2 v(t)}{dt^2}
 In this work, we compare the motion profiles of the following three models:
 \begin{enumerate}
 \item \textbf{Normal Model}: The default end-to-end neural network trained with deep reinforcement learning to perform map-less navigation
-\item \textbf{Normal Model with Velocity Smoother}: The same network as Normal Model but trained with a simple velocity smoother
+\item \textbf{Model with Velocity Smoother}: The same network as Normal Model but trained with a simple velocity smoother
 \item \textbf{Model with Jerk-Learning}: A network very similar to Normal Model but with an added reward function that penalizes the robot for the jerk generated. The inputs of this model are also slightly different (for the reward function to work properly).
 \end{enumerate}
 
@@ -61,7 +61,7 @@ In the \textit{Model with Jerk-Learning}, the acceleration and jerk of the robot
 \end{itemize}
 
 \subsection{Action}
-For all 3 models, the output (action) is a linear velocity ($v_t$) and an angular velocity ($\omega_{t}$). However, the action for the \textit{Normal Model with Velocity Smoother} is slightly different as it is constrained by a simple velocity smoother. In this work, we use the following algorithm for simple velocity smoothing:
+For all 3 models, the output (action) is a linear velocity ($v_t$) and an angular velocity ($\omega_{t}$). However, the action for the \textit{Model with Velocity Smoother} is slightly different as it is constrained by a simple velocity smoother. In this work, we use the following algorithm for simple velocity smoothing:
 
 \begin{algorithm}
 \caption{Simple Velocity Smoother}
@@ -145,7 +145,7 @@ The network architecture of the \textit{Model with Jerk-Learning} is slightly di
 
 
 \subsection{Training Methodology}
-The training procedure of both networks is according to ~\autoref{main:training_procedure} ~\cite{xie_learning_2018}.
+The training procedure of both networks is according to ~\autoref{main:training_procedure} ~\cite{xie_learning_2018}:
 \begin{algorithm}
 \caption{Assisted DDPG}
 \label{main:training_procedure}
@@ -170,24 +170,64 @@ Initialize replay buffer $R$ and exploration noise $\epsilon$\;
 \end{algorithm}
 \newpage
 
-Our network from ~\autoref{main:fig:network_architecture} was trained in 3 different Stage simulation worlds~\ref{appsec:blank_world},~\ref{appsec:simple_world},~\ref{appsec:complex_world}. In each simulation world, the network was trained until the average performance reaches a plateau (i.e. when gradient of average performance with respect to time is approximately zero).
+All 3 models were trained in 2 different Stage simulation worlds~\autoref{appsec:simple_world},~\autoref{appsec:complex_world}. In each simulation world, the networks were trained until the average performance reached a plateau (i.e. when gradient of average performance with respect to time is approximately zero).
 
-Here, average performance of the network is obtained according to~\autoref{main:eq:average_performance}. To our knowledge, ~\autoref{main:eq:average_performance} has not been explicitly mentioned in the literature; however, our understanding is that this is what is typically meant by average performance in the mapless navigation literature ~\cite{xie_learning_2018}.
+% Here, average performance of the network is obtained according to~\autoref{main:eq:average_performance}. To our knowledge, ~\autoref{main:eq:average_performance} has not been explicitly mentioned in the literature; however, our understanding is that this is what is typically meant by average performance in the mapless navigation literature ~\cite{xie_learning_2018}.
+% \begin{equation}
+% \text{Average Performance} = \underset{Ep \sim (100 Eps)}{\mathrm E}\bigg[\underset{(s, a) \sim Ep}{\mathrm E} \big(\underset{a \sim \pi}{\max} Q^{\pi}(s, a)\big)\bigg]
+% \label{main:eq:average_performance}
+% \end{equation}
+
+\section{Experiment Results}
+In this section, we discuss and compare the results of training the 3 different models mentioned in ~\autoref{main:sec:3_models}. Visualizing these results, however, remains a difficulty. Consider ~\autoref{main:visualization_difficulty_1}:
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=.9\linewidth]{\Pic{png}{paper_Simple World_Success Rate_lineraw}}
+  \vspace{\BeforeCaptionVSpace}
+  \caption{Graph of Episode Result vs Time. Episode result is 1 if the agent successfully reaches the target, and 0 if it fails.}
+  \label{main:visualization_difficulty_1}
+\end{figure}
+\newpage
+
+It is difficult to see how well the model is performing over time from ~\autoref{main:visualization_difficulty_1} because the agent constantly alternates between success and failure. Therefore, we have chosen to use an exponentially weighted moving average (EWMA) to better visualize how the agent's performance is improving over time (as well as other variables which we will look at in this work). EWMA is calculated as follows:
 \begin{equation}
-\text{Average Performance} = \underset{Ep \sim (100 Eps)}{\mathrm E}\bigg[\underset{(s, a) \sim Ep}{\mathrm E} \big(\underset{a \sim \pi}{\max} Q^{\pi}(s, a)\big)\bigg]
-\label{main:eq:average_performance}
+y(t) = \frac{x_t + (1-\alpha)x_{t-1} + (1-\alpha)^{2}x_{t-2} + ... + (1-\alpha)^{t}x_0}{1 + (1-\alpha) + (1-\alpha^2) + ... + (1-\alpha)^t}
+\end{equation}
+
+Where:
+\begin{itemize}
+\item $x_t$ is the input
+\item $y_t$ is the result
+\item $\alpha$ is the smoothing factor.
+\end{itemize}
+
+While it is possible to pass $\alpha$ directly, it's often easier to think about the span of an EW moment. In this work, unless otherwise specified, we use a span of 1000. This is also known as an "N-day EW moving average". That is:
+\begin{equation}
+\alpha = \frac{2}{s + 1}& \text{for span s $\geq$ 1}
 \end{equation}
 
 
-\section{Experiment Results}
-In this section, we discuss and compare the results of training the 3 different models mentioned in ~\autoref{main:sec:3_models}. We do this by looking at:
-\begin{enumerate}
-\item \textbf{Average Performance over Time}: How fast does the model learn? How well does it perform in the end?
-\item \textbf{Average Jerk over Time}: Does the jerk penalty lead to a smoother motion profile than using a simple velocity smoother?
-\item \textbf{Motion Profile}: What motion profile does the trained model generate? Trapezoidal or S-Curve?
-\end{enumerate}
+Using EWMA, our graph of episode result vs time is now transformed into a graph of success rate vs time:
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=.9\linewidth]{\Pic{png}{paper_Simple World_Success Rate_linesmoothed}}
+  \vspace{\BeforeCaptionVSpace}
+  \caption{Graph of Success Rate vs Time.}
+  \label{main:visualization_difficulty_2}
+\end{figure}
+
+
+% \begin{enumerate}
+% \item \textbf{Average Performance over Time}: How fast does the model learn? How well does it perform in the end?
+% \item \textbf{Average Jerk over Time}: Does the jerk penalty lead to a smoother motion profile than using a simple velocity smoother?
+% \item \textbf{Motion Profile}: What motion profile does the trained model generate? Trapezoidal or S-Curve?
+% \end{enumerate}
 
 \subsection{Average Performance over Time}
+For all 3 models, 
+
 \subsection{Average Jerk over Time}
 \subsection{Motion Profile}
 
