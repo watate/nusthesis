@@ -70,6 +70,10 @@ For all 3 models, the output (action) is a linear velocity ($v_t$) and an angula
 \ElseIf{Target Velocity > Control Velocity}{Control Velocity = $\max$(Target Velocity, Control Velocity - $v_c$)}
 \Else{Control Velocity = Target Velocity}
 \end{algorithm}
+Where:
+\begin{itemize}
+\item $v_c$ is some constant velocity value
+\end{itemize}
 
 Essentially, ~\autoref{main:simple_v_smoother} is an acceleration limiting approach to motion control where a maximum acceleration is assumed. This generates a trapezoidal motion profile similar to ~\autoref{main:fig:motion_profile_1}. 
 
@@ -104,7 +108,7 @@ Reward, r_{t} =
   -5& \text{if robot crashes},\\ 
   5& \text{if robot reaches the goal},\\
   \gamma{\bigg((d_{t-1} - d_{t})\Delta{t} - C\bigg)} -\\
-  \frac{\gamma}{25} \Bigg(\bigg(\frac{j_{t}}{\max{j_{t}}}\bigg)^{2} + \bigg(\frac{\zeta_{t}}{\max{\zeta{t}}}\bigg)^2\Bigg)& \text{otherwise}.
+  \frac{\gamma}{25} \Bigg(\bigg(\frac{j_{t}}{\max{j_{t}}}\bigg)^{2} + \bigg(\frac{\zeta_{t}}{\max{\zeta_{t}}}\bigg)^2\Bigg)& \text{otherwise}.
   \\  
 \end{cases}
 \end{equation}
@@ -113,7 +117,7 @@ Where:
 \item $j_t$ is linear jerk at time $t$
 \item $\max{j_t}$ is the theoretical maximum linear jerk for each state transition
 \item $\zeta_{t}$ is angular jerk at time $t$
-\item $\max{\zeta{t}}$ is the theoretical maximum angular jerk for each state transition
+\item $\max{\zeta_{t}}$ is the theoretical maximum angular jerk for each state transition
 \end{itemize}
 
 \subsection{Network Architecture}
@@ -225,7 +229,7 @@ Using EWMA, our graph of performance vs time is now smoothened and we are able t
 % \end{enumerate}
 
 \subsection{Performance of Models}
-In this section, we compare the performance of the 3 models. We measure performance as the return of a trajectory (which is a measure of cumulative reward along the trajectory). The way this is computed is according to ~\autoref{main:eq:performance}:
+In this section, we compare the performance of the 3 models. Worlde measure performance as the return of a trajectory (which is a measure of cumulative reward along the trajectory). The way this is computed is according to ~\autoref{main:eq:performance}:
 
 \begin{equation}
 \label{main:eq:performance}
@@ -269,7 +273,36 @@ In this section, we compare the performance of the 3 models. We measure performa
 
 \subsection{Motion Profile of Models}
 
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=.9\linewidth]{\Pic{png}{paper_simple_Linear Jerk_hist}}
+  \vspace{\BeforeCaptionVSpace}
+  \caption{Histogram of the linear jerk of all 3 models in Simple World~\autoref{appsec:simple_world}}
+  \label{main:motion_1}
+\end{figure}
 
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=.9\linewidth]{\Pic{png}{paper_simple_Angular Jerk_hist}}
+  \vspace{\BeforeCaptionVSpace}
+  \caption{Histogram of the angular jerk of all 3 models in Simple World~\autoref{appsec:simple_world}}
+  \label{main:motion_1}
+\end{figure}
 
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=.9\linewidth]{\Pic{png}{paper_complex_Linear Jerk_hist}}
+  \vspace{\BeforeCaptionVSpace}
+  \caption{Histogram of the linear jerk of all 3 models in Complex World~\autoref{appsec:complex_world}}
+  \label{main:motion_1}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=.9\linewidth]{\Pic{png}{paper_complex_Angular Jerk_hist}}
+  \vspace{\BeforeCaptionVSpace}
+  \caption{Histogram of the angular jerk of all 3 models in Complex World~\autoref{appsec:complex_world}}
+  \label{main:motion_1}
+\end{figure}
 
 \section{Discussion}
