@@ -160,3 +160,14 @@
 %%% For example code used only
 \usepackage{lipsum} % for generating dummy text
 \newcommand{\CMD}[1]{\texttt{\string#1}} % for typing a command
+
+%For list of symbols
+%\usepackage{nomencl}
+
+\usepackage[symbols,nogroupskip,sort=none]{glossaries-extra}
+
+\glsxtrnewsymbol[description={position}]{x}{\ensuremath{x}}
+\glsxtrnewsymbol[description={velocity}]{v}{\ensuremath{v}}
+\glsxtrnewsymbol[description={acceleration}]{a}{\ensuremath{a}}
+\glsxtrnewsymbol[description={time}]{t}{\ensuremath{t}}
+\glsxtrnewsymbol[description={force}]{F}{\ensuremath{F}}  

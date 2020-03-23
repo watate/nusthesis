@@ -161,10 +161,12 @@
 \renewcommand\listoffigures{\begin{SingleSpace}\memoirlistoffigures
   \end{SingleSpace}}
 
-\let\memoirlistoftables=\listoftables
-\renewcommand\listoftables{\begin{SingleSpace}\memoirlistoftables
-  \end{SingleSpace}}
+%\let\memoirlistoftables=\listoftables
+%\renewcommand\listoftables{\begin{SingleSpace}\memoirlistoftables
+%  \end{SingleSpace}}
 
+\newcommand{\listofsymbols}{List of Symbols}
+\newlistof{listofsymbols}{syms}{\listofsymbols}
 
 % Customized names:
 \newcommand\acknowledgename{Acknowledgments}
@@ -416,10 +418,22 @@
   \phantomsection\addcontentsline{toc}{chapter}{List of Figures}
   \chapter*{List of Figures}\vspace{2em}\makeatletter\@starttoc{lof}\makeatother}
 
-\renewcommand{\listoftables}{
+% \renewcommand{\listoftables}{
+%   \intendclearpage
+%   \phantomsection\addcontentsline{toc}{chapter}{List of Tables}
+%   \chapter*{List of Tables}\vspace{2em}\makeatletter\@starttoc{lot}\makeatother}
+
+%Quick and dirty way: https://tex.stackexchange.com/questions/179631/list-of-symbols-and-abbreviations-just-as-two-columns
+%Longer way:
+  %https://latex.org/forum/viewtopic.php?t=21997
+  %https://tex.stackexchange.com/questions/27824/using-package-nomencl
+  %
+
+\renewcommand{\listofsymbols}{
   \intendclearpage
-  \phantomsection\addcontentsline{toc}{chapter}{List of Tables}
-  \chapter*{List of Tables}\vspace{2em}\makeatletter\@starttoc{lot}\makeatother}
+  \printunsrtglossary[title={List of Symbols}, type=symbols,style=long]
+  }
+%\printunsrtglossary[title={List of Symbols}, type=symbols,style=long]
 
 \usepackage[sf]{titlesec}
 \titleformat{\chapter}[display]{\normalfont\huge\bfseries\ssp}{\chaptertitlename\ \thechapter}{20pt}{\Huge}
