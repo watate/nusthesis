@@ -17,7 +17,7 @@ In map-less navigation, we deal with point-to-point motion. That is, the goal of
 
 To perform point-to-point motion with minimal vibration, previous works have focused on optimization of the motion profile itself~\cite{meckl_optimized_1998}. For example, ~\autoref{main:fig:motion_profile_1} shows a comparison between a typical trapezoidal motion profile and an (improved) S-curve motion profile. 
 
-\begin{figure}[h]
+\begin{figure}[!ht]
   \centering
   \includegraphics[width=.9\linewidth]{\Pic{png}{motion_profile_1}}
   \vspace{\BeforeCaptionVSpace}
@@ -123,7 +123,7 @@ Where:
 \subsection{Network Architecture}
 The network architecture we use is largely similar to Xie et. al's Assisted DDPG network~\cite{xie_learning_2018}. The difference, however, is that we have discarded the convolutional neural network (CNN) layers and used a sparser laser beam to allow the agent to learn the policy faster. We reiterate: the goal here is not to produce a state-of-the-art model for map-less navigation, but to empirically study a learning-based approach to jerk reduction. ~\autoref{main:fig:network_architecture} shows the network architecture of the \textit{Normal Model}.
 
-\begin{figure}[h]
+\begin{figure}[!ht]
   \centering
   \includegraphics[width=.9\linewidth]{\Pic{png}{network_architecture}}
   \vspace{\BeforeCaptionVSpace}
@@ -139,7 +139,7 @@ The network architecture of ~\autoref{main:fig:network_architecture} consists of
 
 The network architecture of the \textit{Model with Jerk-Learning} is slightly different in terms of its inputs (as mentioned in ~\autoref{main:sec:state}). It is shown in ~\autoref{main:fig:network_architecture_jerk}
 
-\begin{figure}[h]
+\begin{figure}[!ht]
   \centering
   \includegraphics[width=.9\linewidth]{\Pic{png}{network_architecture_jerk}}
   \vspace{\BeforeCaptionVSpace}
@@ -185,7 +185,7 @@ All 3 models were trained in 2 different Stage simulation worlds~\autoref{appsec
 \section{Experiment Results}
 In this section, we discuss and compare the results of training the 3 different models mentioned in ~\autoref{main:sec:3_models}. Visualizing these results, however, remains a difficulty. Consider ~\autoref{main:visualization_difficulty_1}:
 
-\begin{figure}[h]
+\begin{figure}[!ht]
   \centering
   \includegraphics[width=.9\linewidth]{\Pic{png}{paper_Simple World_Performance_Raw_line}}
   \vspace{\BeforeCaptionVSpace}
@@ -214,7 +214,7 @@ While it is possible to pass $\alpha$ directly, it's often easier to think about
 
 Using EWMA, our graph of performance vs time is now smoothened and we are able to see the long-term trends:
 
-\begin{figure}[h]
+\begin{figure}[!ht]
   \centering
   \includegraphics[width=.9\linewidth]{\Pic{png}{paper_Simple World_Performance_Smooth_line}}
   \vspace{\BeforeCaptionVSpace}
@@ -229,7 +229,8 @@ Using EWMA, our graph of performance vs time is now smoothened and we are able t
 % \end{enumerate}
 
 \subsection{Performance of Models}
-In this section, we compare the performance of the 3 models. Worlde measure performance as the return of a trajectory (which is a measure of cumulative reward along the trajectory). The way this is computed is according to ~\autoref{main:eq:performance}:
+\label{main:subsec:performance}
+In this section, we compare the performance of the 3 models. We measure performance as the return of a trajectory (which is a measure of cumulative reward along the trajectory). The way this is computed is according to ~\autoref{main:eq:performance}:
 
 \begin{equation}
 \label{main:eq:performance}
@@ -237,7 +238,7 @@ In this section, we compare the performance of the 3 models. Worlde measure perf
 \end{equation}
 
 ~\autoref{main:performance_1} and ~\autoref{main:performance_2} show that all 3 models display performance improvements at approximately equal rates. All 3 models also plateau at roughly the same performance level. We also observe that the \textit{Model with Jerk-Learning} generally outperforms the \textit{Model with Velocity Smoother}.
-\begin{figure}[h]
+\begin{figure}[!htbp]
   \centering
   \includegraphics[width=.9\linewidth]{\Pic{png}{paper_Simple World_Performance_Smooth_line}}
   \vspace{\BeforeCaptionVSpace}
@@ -245,17 +246,17 @@ In this section, we compare the performance of the 3 models. Worlde measure perf
   \label{main:performance_1}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[!htbp]
   \centering
   \includegraphics[width=.9\linewidth]{\Pic{png}{paper_Complex World_Performance_Smooth_line}}
   \vspace{\BeforeCaptionVSpace}
-  \caption{Performance vs Time (Simple World)}
+  \caption{Performance vs Time (Complex World)}
   \label{main:performance_2}
 \end{figure}
 
 ~\autoref{main:performance_3} and ~\autoref{main:performance_4} show that all 3 models display improvements in success rate at approximately equal rates. All 3 models also end up plateuing at the same success rate. Again, we observe that the \textit{Model with Jerk-Learning} generally outperforms the \textit{Model with Velocity Smoother}.
 
-\begin{figure}[h]
+\begin{figure}[!htbp]
   \centering
   \includegraphics[width=.9\linewidth]{\Pic{png}{paper_Simple World_Success Rate_Smooth_line}}
   \vspace{\BeforeCaptionVSpace}
@@ -263,46 +264,87 @@ In this section, we compare the performance of the 3 models. Worlde measure perf
   \label{main:performance_3}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[!htbp]
   \centering
   \includegraphics[width=.9\linewidth]{\Pic{png}{paper_Complex World_Success Rate_Smooth_line}}
   \vspace{\BeforeCaptionVSpace}
-  \caption{Success Rate vs Time (Simple World)}
+  \caption{Success Rate vs Time (Complex World)}
   \label{main:performance_4}
 \end{figure}
 
 \subsection{Motion Profile of Models}
+\label{main:subsec:motion}
+In this section, we compare the motion profiles of the 3 models. We do this by looking at histograms of linear and angular jerk for each model in each world.
 
-\begin{figure}[h]
+\begin{figure}[!htbp]
   \centering
   \includegraphics[width=.9\linewidth]{\Pic{png}{paper_simple_Linear Jerk_hist}}
   \vspace{\BeforeCaptionVSpace}
-  \caption{Histogram of the linear jerk of all 3 models in Simple World~\autoref{appsec:simple_world}}
+  \caption{Histograms of linear jerk for 500 episodes across all 3 models in Simple World ~\autoref{appsec:simple_world}. Model with Jerk-Learning only slightly outperforms the other models here in terms of jerk reduction.}
   \label{main:motion_1}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[!htbp]
   \centering
   \includegraphics[width=.9\linewidth]{\Pic{png}{paper_simple_Angular Jerk_hist}}
   \vspace{\BeforeCaptionVSpace}
-  \caption{Histogram of the angular jerk of all 3 models in Simple World~\autoref{appsec:simple_world}}
+  \caption{Histograms of angular jerk for 500 episodes across all 3 models in Simple World ~\autoref{appsec:simple_world}. Model with Velocity Smoother outperforms the other models here in terms of jerk reduction.}
   \label{main:motion_1}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[!ht]
   \centering
   \includegraphics[width=.9\linewidth]{\Pic{png}{paper_complex_Linear Jerk_hist}}
   \vspace{\BeforeCaptionVSpace}
-  \caption{Histogram of the linear jerk of all 3 models in Complex World~\autoref{appsec:complex_world}}
+  \caption{Histograms of linear jerk for 500 episodes across all 3 models in Complex World ~\autoref{appsec:complex_world}. Model with Jerk-Learning only slightly outperforms the other models here in terms of jerk reduction.}
   \label{main:motion_1}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[!htbp]
   \centering
   \includegraphics[width=.9\linewidth]{\Pic{png}{paper_complex_Angular Jerk_hist}}
   \vspace{\BeforeCaptionVSpace}
-  \caption{Histogram of the angular jerk of all 3 models in Complex World~\autoref{appsec:complex_world}}
+  \caption{Histograms of angular jerk for 500 episodes across all 3 models in Complex World ~\autoref{appsec:complex_world}. Model with Velocity Smoother outperforms the other models here in terms of jerk reduction.}
   \label{main:motion_1}
 \end{figure}
 
 \section{Discussion}
+From ~\autoref{main:subsec:performance}, we observe that neither the velocity smoother nor the jerk-learning reward feature seemed to have a significant impact on the training time required.
+
+~\autoref{main:subsec:motion} showed that the \textit{Model with Velocity Smoother} outperformed the other 2 models in terms of jerk reduction. The only cases where it seemed to (very) slightly underperform the \textit{Model with Jerk-Learning} were for linear jerk. We can understand why this is case when we look at the histograms of linear velocities:
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=.9\linewidth]{\Pic{png}{paper_simple_Linear Velocity_hist}}
+  \vspace{\BeforeCaptionVSpace}
+  \caption{Histograms of linear velocity for 500 episodes across all 3 models in Simple World ~\autoref{appsec:simple_world}}
+  \label{main:discussion:linear_velocity:simple}
+\end{figure}
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=.9\linewidth]{\Pic{png}{paper_complex_Linear Velocity_hist}}
+  \vspace{\BeforeCaptionVSpace}
+  \caption{Histograms of linear velocity for 500 episodes across all 3 models in Complex World ~\autoref{appsec:complex_world}}
+  \label{main:discussion:linear_velocity:complex}
+\end{figure}
+
+From ~\autoref{main:discussion:linear_velocity:simple} and ~\autoref{main:discussion:linear_velocity:complex} we see that to avoid generating any linear jerk the \textit{Model with Jerk-Learning} only produces the highest linear velocity possible in every state. That is, it avoids changes in velocities to avoid generating jerk. This is also the case for angular velocities:
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=.9\linewidth]{\Pic{png}{paper_simple_Angular Velocity_hist}}
+  \vspace{\BeforeCaptionVSpace}
+  \caption{Histograms of angular velocity for 500 episodes across all 3 models in Simple World ~\autoref{appsec:simple_world}}
+  \label{main:discussion:angular_velocity:simple}
+\end{figure}
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=.9\linewidth]{\Pic{png}{paper_complex_Angular Velocity_hist}}
+  \vspace{\BeforeCaptionVSpace}
+  \caption{Histograms of angular velocity for 500 episodes across all 3 models in Complex World ~\autoref{appsec:complex_world}}
+  \label{main:discussion:angular_velocity:complex}
+\end{figure}
+
+Furthermore, ~\autoref{main:discussion:angular_velocity:simple} and ~\autoref{main:discussion:angular_velocity:complex} also show why the \textit{Model with Velocity Smoother} outperforms the other 2 models in terms of angular jerk: the angular velocities generated by \textit{Model with Velocity Smoother} is more spread out.
