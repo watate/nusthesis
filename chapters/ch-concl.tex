@@ -3,30 +3,21 @@
 
 \section{Conclusion}
 
-In this work, we proposed an approach to smoothing the motion profile of a robot without explicitly coding for the motion profile (i.e. through a learning-based approach)....
+In this work, we proposed an approach to smoothing the motion profile of a robot without explicitly coding for the motion profile (i.e. through a learning-based approach). This approach has been shown to not been able to outperform a model with a velocity smoother in terms of jerk reduction. What we have shown instead is that it may be prudent to hard code the mechanical limitations of the robot as this approach may be simpler, and does not impact the training time or success rate of the agent (at least in terms of mapless navigation).
 
-While our method does improve the smoothness of the motion profile of the robot, it does have a number of limitations. First,... 
-
-By enabling smooth map-less navigation without user-programmed motion profiles, we believe that our approach represents a small step towards making reinforcement learning a practical, automated, and readily usable tool in this area. 
+While hard coding the mechanical limitations of the robot may improve the smoothness of the motion profile of the robot, it does have a number of limitations. First, this assumes that the programmer understands what those limitations are in the first place. Secondly, the effort to generate and test the limitations of the robot may be non-trivial. Thirdly, the hard coding the limitations of the robot may not necessarily solve the problem we intend to solve in every scenario (however, in this scenario it happens to work).
 
 \section{Future Research Directions}
 Many open problems remain, which relate to and could build on this thesis work. Below, we describe some of the frontiers (which we consider) to be the most exciting.
 
 \subsection{Inverse Reinforcement Learning}
+Instead of developing a reward feature with trial and error, inverse reinforcement learning (IRL) allows us to learn what the appropriate reward feature may be by observing the behaviour of an agent that is already capable of performing smooth mapless navigation. We are able to do this because autonomous navigation in environments where global knowledge of the map is available is already well understood (e.g. computing the shortest feasible path with the Dijkstra algorithm)~\cite{lavalle_planning_2006}, and motion control methods that achieve fast motions without residual vibrations are also well known~\cite{meckl_optimized_1998}. We can use this to extract the optimal reward function that allows the agent to learn smooth mapless navigation.
 
-\lipsum[5]
+\subsection{Exploration}
+The idea behind exploration is to allow the agent to experience unfamiliar parts of the state space and avoid converging to a suboptimal policy. Policy gradient methods are prone to converging to suboptimal policies, as we observed many times during this thesis. Improving exploration may allow the agent to learn policy that can perform smoother mapless navigation.
 
-\subsection{AI Safety Feedback Loop with Humans}
-
-\lipsum[6]
-
-\subsection{Multiple Robot Navigation}
-
-\lipsum[6]
-
-\subsection{Improving experience replay}
-
-\lipsum[6]
+\subsection{Prioritized Experience Replay}
+Experience replay lets DRL agents remember and reuse trajectories from the past. In this work, experience transitions were uniformly sampled from a replay buffer without considering their significance. Prioritizing specific experiences can be utilized to replay important transitions more frequently and learn more efficiently~\cite{schaul_prioritized_2016}
 
 \vspace{2em}
 We believe the above (but not limited to) future research directions will advance the technology presented in this thesis and contribute to academia and industry.
