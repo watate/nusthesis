@@ -165,9 +165,45 @@
 %\usepackage{nomencl}
 
 \usepackage[symbols,nogroupskip,sort=none]{glossaries-extra}
+%\usepackage[symbols,nogroupskip,sort=use]{glossaries-extra}
 
-\glsxtrnewsymbol[description={position}]{x}{\ensuremath{x}}
-\glsxtrnewsymbol[description={velocity}]{v}{\ensuremath{v}}
-\glsxtrnewsymbol[description={acceleration}]{a}{\ensuremath{a}}
-\glsxtrnewsymbol[description={time}]{t}{\ensuremath{t}}
-\glsxtrnewsymbol[description={force}]{F}{\ensuremath{F}}  
+
+\glsxtrnewsymbol[description={}]{}{\ensuremath{}}
+
+\glsxtrnewsymbol[description={Linear Velocity at time t}]{v_{t}}{\ensuremath{v_{t}}}
+\glsxtrnewsymbol[description={Angular Velocity at time t}]{omega}{\ensuremath{\omega_{t}}}
+\glsxtrnewsymbol[description={Linear Acceleration at time t}]{accel_t}{\ensuremath{accel_{t}}}
+\glsxtrnewsymbol[description={Angular Acceleration at time t}]{alpha_t}{\ensuremath{\alpha_{t}}}
+\glsxtrnewsymbol[description={Linear Jerk at time t}]{j_t}{\ensuremath{j_{t}}}
+\glsxtrnewsymbol[description={Angular Jerk at time t}]{zeta_t}{\ensuremath{\zeta_{t}}}
+\glsxtrnewsymbol[description={270-degree sparse laser scan at time t}]{y_t}{\ensuremath{y_{t}}}
+\glsxtrnewsymbol[description={Smoothing factor}]{ewma}{\ensuremath{\alpha_{EWMA}}}
+\glsxtrnewsymbol[description={Markov Decision Process}]{MDP}{\ensuremath{MDP}}
+\glsxtrnewsymbol[description={State space: a set of states of the environment}]{S}{\ensuremath{S}}
+\glsxtrnewsymbol[description={Action space: a set of actions which the agent selects from each timestep}]{A}{\ensuremath{A}}
+\glsxtrnewsymbol[description={Transition probability distribution}]{P(r,s'|s,a)}{\ensuremath{P(r,s'|s,a)}}
+\glsxtrnewsymbol[description={Policy}]{pi}{\ensuremath{\pi}}
+\glsxtrnewsymbol[description={Parameters of the policy}]{theta}{\ensuremath{\theta}}
+\glsxtrnewsymbol[description={Reward function}]{R(s_t, a_t, s_{t+1})}{\ensuremath{R(s_t, a_t, s_{t+1})}}
+\glsxtrnewsymbol[description={Current state at time t}]{s_t}{\ensuremath{s_t}}
+\glsxtrnewsymbol[description={Action taken at time t}]{a_t}{\ensuremath{a_t}}
+\glsxtrnewsymbol[description={Reward received at time t}]{r_t}{\ensuremath{r_t}}
+\glsxtrnewsymbol[description={Discount factor}]{gamma}{\ensuremath{\gamma}}
+\glsxtrnewsymbol[description={Distance between robot and its target at time t}]{d_t}{\ensuremath{d_t}}
+\glsxtrnewsymbol[description={Time for each step}]{delta_t}{\ensuremath{\delta{t}}}
+\glsxtrnewsymbol[description={Constant used as a time penalty}]{C}{\ensuremath{C}}
+\glsxtrnewsymbol[description={Probability of a T-step trajectory}]{P(T|pi)}{\ensuremath{P(\tau|\pi)}}
+\glsxtrnewsymbol[description={Expected return}]{J(pi)}{\ensuremath{J(\pi)}}
+\glsxtrnewsymbol[description={Optimal policy}]{pi star}{\ensuremath{\pi^{*}}}
+\glsxtrnewsymbol[description={On-Policy Value Function}]{Vpis}{\ensuremath{V^{\pi}(s)}}
+\glsxtrnewsymbol[description={On-Policy Action-Value Function}]{Qpisa}{\ensuremath{Q^{\pi}(s,a)}}
+\glsxtrnewsymbol[description={Optimal Value Function}]{Vstarpis}{\ensuremath{V^{*}(s)}}
+\glsxtrnewsymbol[description={Optimal Action-Value Function}]{Qstarpisa}{\ensuremath{Q^{*}(s,a)}}
+\glsxtrnewsymbol[description={Advantage Function}]{apisa}{\ensuremath{A^{\pi}(s,a)}}
+\glsxtrnewsymbol[description={Parameters of the Deep Q-Network}]{phi}{\ensuremath{\phi}}
+\glsxtrnewsymbol[description={Parameters of the target network}]{phi_target}{\ensuremath{\phi_{targ}}}
+\glsxtrnewsymbol[description={Mean-Squared Bellman Error Loss Function}]{msbe_loss}{\ensuremath{L(\phi, {\mathcal D})}}
+
+% This package helps figures from floating around
+  %https://tex.stackexchange.com/questions/8625/force-figure-placement-in-text
+\usepackage{float}
