@@ -1,5 +1,10 @@
 \begin{abstract}
 
-Summary
+This work compares a learning-based approach with a hard coding approach to smoothing the motion profile of a robot trained to perform mapless navigation.
 
+It is necessary to smooth the motion profile to meet the physical limits of the robot as well as to reduce unwanted vibrations. These vibrations occur for robots trained in deep reinforcement learning (DRL) because conventional DRL models for map-less navigation implicitly assume that arbitrary motion in the configuration space is allowed as long as obstacles are avoided.
+
+We design a reward feature which punishes the robot for performing jerky actions. We compare the results of training the robot using this reward feature with the results of training the robot with a velocity smoother instead. 
+
+Our results show that the robot fails to learn a trapezoidal or S-curve motion profile to reduce jerk. The robot also underperforms our velocity smoother in terms of jerk reduction. These results highlight the difficulty of tuning the appropriate reward function for the robot to learn a desired behaviour and shows instead how hard coding the limitations of the robot can be very effective. Further research may consider how to simultaneously learn optimal behaviour which is known (e.g. velocity smoothing) with optimal behaviour which is not known (obstacle avoidance and target-driven navigation). For example, designing a training schema which incorporates both inverse reinforcement learning and reinforcement learning may achive this.
 \end{abstract}

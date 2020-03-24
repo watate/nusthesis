@@ -5,10 +5,10 @@
 \label{ch:main}
 \vspace{2em}
 
-The main contribution of this work is to \textbf{demonstrate a learning-based approach to smoothing the motion profile of a DRL model}. We do this in the following sequence:
+The main contribution of this work is to test a learning-based approach to smoothing the motion profile of a DRL model. We do this in the following sequence:
 \begin{enumerate}
-\item Introduce the idea of "smooth" motion profiles
-\item Present the network architecture used to apply this learning-based approach
+\item Introduce smooth motion profiles
+\item Present the network architectures used to apply this learning-based approach
 \item Discuss the empirical findings of this learning-based approach as well as compare it with a non-learning based approach
 \end{enumerate}
 
@@ -17,7 +17,7 @@ In map-less navigation, we deal with point-to-point motion. That is, the goal of
 
 To perform point-to-point motion with minimal vibration, previous works have focused on optimization of the motion profile itself~\cite{meckl_optimized_1998}. For example, ~\autoref{main:fig:motion_profile_1} shows a comparison between a typical trapezoidal motion profile and an (improved) S-curve motion profile. 
 
-\begin{figure}[!ht]
+\begin{figure}[H]
   \centering
   \includegraphics[width=.9\linewidth]{\Pic{png}{motion_profile_1}}
   \vspace{\BeforeCaptionVSpace}
@@ -55,7 +55,7 @@ In the \textit{Model with Jerk-Learning}, the acceleration and jerk of the robot
 \begin{itemize}
 \item a stack of three 270-degree sparse laser scans y ($y_{t}, y_{t-1}, y_{t-2}$)
 \item a stack of linear and angular velocities of the robot ($v_{t}, \omega_{t}, v_{t-1}, \omega_{t-1}, v_{t-2}, \omega_{t-2}$)
-\item a stack of linear and angular accelerations of the robot ($a_{t}, \alpha_{t}, a_{t-1}, \alpha_{t-1}, a_{t-2}, \alpha_{t-2}$)
+\item a stack of linear and angular accelerations of the robot ($accel_{t}, \alpha_{t}, accel_{t-1}, \alpha_{t-1}, accel_{t-2}, \alpha_{t-2}$)
 \item a stack of linear and angular jerks of the robot ($j_{t}, \zeta_{t}, j_{t-1}, \zeta_{t-1}, j_{t-2}, \zeta_{t-2}$)
 \item x and y components of the robot's displacement from its target position ($d_{x,t}, d_{y,t}$)
 \end{itemize}
@@ -63,7 +63,7 @@ In the \textit{Model with Jerk-Learning}, the acceleration and jerk of the robot
 \subsection{Action}
 For all 3 models, the output (action) is a linear velocity ($v_t$) and an angular velocity ($\omega_{t}$). However, the action for the \textit{Model with Velocity Smoother} is slightly different as it is constrained by a simple velocity smoother. In this work, we use the following algorithm for simple velocity smoothing:
 
-\begin{algorithm}
+\begin{algorithm}[H]
 \caption{Simple Velocity Smoother}
 \label{main:simple_v_smoother}
 \If{Target Velocity < Control Velocity}{Control Velocity = $\min$(Target Velocity, Control Velocity + $v_c$)}
@@ -75,7 +75,7 @@ Where:
 \item $v_c$ is some constant velocity value
 \end{itemize}
 
-Essentially, ~\autoref{main:simple_v_smoother} is an acceleration limiting approach to motion control where a maximum acceleration is assumed. This generates a trapezoidal motion profile similar to ~\autoref{main:fig:motion_profile_1}. 
+Essentially, ~\autoref{main:simple_v_smoother} is an acceleration limiting approach to motion control where a maximum acceleration is assumed. This generates a trapezoidal motion profile similar to the one found in ~\autoref{main:fig:motion_profile_1}. 
 
 \subsection{Simulation Setup}
 To enable the DRL agent to learn from trial and error, we use a simple robot simulation environment called Stage. Stage provides a virtual world populated by mobile robots and sensors, along with various objects for the robots to sense and manipulate. We use Stage in ROS (Robot Operating System) to train our DRL agent~\cite{gerkey_playerstage_nodate}.
@@ -123,7 +123,7 @@ Where:
 \subsection{Network Architecture}
 The network architecture we use is largely similar to Xie et. al's Assisted DDPG network~\cite{xie_learning_2018}. The difference, however, is that we have discarded the convolutional neural network (CNN) layers and used a sparser laser beam to allow the agent to learn the policy faster. We reiterate: the goal here is not to produce a state-of-the-art model for map-less navigation, but to empirically study a learning-based approach to jerk reduction. ~\autoref{main:fig:network_architecture} shows the network architecture of the \textit{Normal Model}.
 
-\begin{figure}[!ht]
+\begin{figure}[H]
   \centering
   \includegraphics[width=.9\linewidth]{\Pic{png}{network_architecture}}
   \vspace{\BeforeCaptionVSpace}
@@ -137,9 +137,19 @@ The network architecture of ~\autoref{main:fig:network_architecture} consists of
 \item \textbf{Augmented critic network (green)}: The critic-DQN is also constructed with fully-connected layers. It has two branches: one is the critic branch where the action is concatenated into the second layer; the other is the DQN branch where (similar to Xie et. al~\cite{xie_learning_2018}) we apply dueling and double network architecture to speed up training and avoid overestimation. Note that there is no nonlinear activation for its output layers.
 \end{enumerate}
 
-The network architecture of the \textit{Model with Jerk-Learning} is slightly different in terms of its inputs (as mentioned in ~\autoref{main:sec:state}). It is shown in ~\autoref{main:fig:network_architecture_jerk}
+The network architecture of the \textit{Model with Velocity Smoother} is exactly the same as the \textit{Normal Model} but with a velocity smoother at the end. It is shown in ~\autoref{main:fig:network_architecture_jerk}:
 
-\begin{figure}[!ht]
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=.9\linewidth]{\Pic{png}{network_architecture_vsmooth}}
+  \vspace{\BeforeCaptionVSpace}
+  \caption{Network architecture of Model with Velocity Smoother. Output layer has a velocity smoother.}
+  \label{main:fig:network_architecture_vsmooth}
+\end{figure}
+
+The network architecture of the \textit{Model with Jerk-Learning} is slightly different in terms of its inputs (as mentioned in ~\autoref{main:sec:state}). It is shown in ~\autoref{main:fig:network_architecture_jerk}:
+
+\begin{figure}[H]
   \centering
   \includegraphics[width=.9\linewidth]{\Pic{png}{network_architecture_jerk}}
   \vspace{\BeforeCaptionVSpace}
@@ -150,7 +160,7 @@ The network architecture of the \textit{Model with Jerk-Learning} is slightly di
 
 \subsection{Training Methodology}
 The training procedure of both networks is according to ~\autoref{main:training_procedure} ~\cite{xie_learning_2018}:
-\begin{algorithm}
+\begin{algorithm}[H]
 \caption{Assisted DDPG}
 \label{main:training_procedure}
 Initialize $A(s, a|\theta^A), Q(s, \sigma|\theta^Q),$ and $\pi(s, \theta^\pi)$\;
@@ -172,7 +182,6 @@ Initialize replay buffer $R$ and exploration noise $\epsilon$\;
     Update target networks\;
   }}
 \end{algorithm}
-\newpage
 
 All 3 models were trained in 2 different Stage simulation worlds~\autoref{appsec:simple_world},~\autoref{appsec:complex_world}. In each simulation world, the networks were trained until the average performance reached a plateau (i.e. when gradient of average performance with respect to time is approximately zero).
 
@@ -183,38 +192,37 @@ All 3 models were trained in 2 different Stage simulation worlds~\autoref{appsec
 % \end{equation}
 
 \section{Experiment Results}
-In this section, we discuss and compare the results of training the 3 different models mentioned in ~\autoref{main:sec:3_models}. Visualizing these results, however, remains a difficulty. Consider ~\autoref{main:visualization_difficulty_1}:
+In this section, we discuss and compare the results of training the 3 different models. Visualizing these results, however, remains a difficulty. Consider ~\autoref{main:visualization_difficulty_1}:
 
-\begin{figure}[!ht]
+\begin{figure}[H]
   \centering
   \includegraphics[width=.9\linewidth]{\Pic{png}{paper_Simple World_Performance_Raw_line}}
   \vspace{\BeforeCaptionVSpace}
   \caption{Graph of Performance vs Time (Raw).}
   \label{main:visualization_difficulty_1}
 \end{figure}
-\newpage
 
 It is difficult to see how well the model is performing over time from ~\autoref{main:visualization_difficulty_1} purely based on the raw results. Therefore, we have chosen to use an exponentially weighted moving average (EWMA) to better visualize how the agent's performance is improving over time (as well as other variables which we will look at in this work). EWMA is calculated as follows:
 \begin{equation}
-y(t) = \frac{x_t + (1-\alpha)x_{t-1} + (1-\alpha)^{2}x_{t-2} + ... + (1-\alpha)^{t}x_0}{1 + (1-\alpha) + (1-\alpha^2) + ... + (1-\alpha)^t}
+y(t) = \frac{x_t + (1-\alpha_{EWMA})x_{t-1} + (1-\alpha_{EWMA})^{2}x_{t-2} + ... + (1-\alpha_{EWMA})^{t}x_0}{1 + (1-\alpha_{EWMA}) + (1-\alpha_{EWMA}^2) + ... + (1-\alpha_{EWMA})^t}
 \end{equation}
 
 Where:
 \begin{itemize}
 \item $x_t$ is the input
 \item $y_t$ is the result
-\item $\alpha$ is the smoothing factor.
+\item $\alpha_{EWMA}$ is the smoothing factor.
 \end{itemize}
 
-While it is possible to pass $\alpha$ directly, it's often easier to think about the span of an EW moment. In this work, unless otherwise specified, we use a span of 1000 for our smoothed results. This is also known as an "N-day EW moving average". That is:
+While it is possible to pass $\alpha_{EWMA}$ directly, it's often easier to think about the span of an EW moment. In this work, unless otherwise specified, we use a span of 1000 for our smoothed results. This is also known as an "N-day EW moving average". That is:
 \begin{equation}
-\alpha = \frac{2}{s + 1} \text{ for span s $\geq$ 1}
+\alpha_{EWMA} = \frac{2}{s + 1} \text{ for span s $\geq$ 1}
 \end{equation}
 
 
 Using EWMA, our graph of performance vs time is now smoothened and we are able to see the long-term trends:
 
-\begin{figure}[!ht]
+\begin{figure}[H]
   \centering
   \includegraphics[width=.9\linewidth]{\Pic{png}{paper_Simple World_Performance_Smooth_line}}
   \vspace{\BeforeCaptionVSpace}
@@ -237,18 +245,20 @@ In this section, we compare the performance of the 3 models. We measure performa
 \text{Performance} = R(\tau) = \sum^{\infty}_{t=0} \gamma^{t} r_t
 \end{equation}
 
+~\autoref{main:eq:performance} (infinite-horizon discounted return) is explained in ~\autoref{background:subsec:reward}.
+
 ~\autoref{main:performance_1} and ~\autoref{main:performance_2} show that all 3 models display performance improvements at approximately equal rates. All 3 models also plateau at roughly the same performance level. We also observe that the \textit{Model with Jerk-Learning} generally outperforms the \textit{Model with Velocity Smoother}.
-\begin{figure}[!htbp]
+\begin{figure}[H]
   \centering
-  \includegraphics[width=.9\linewidth]{\Pic{png}{paper_Simple World_Performance_Smooth_line}}
+  \includegraphics[width=.8\linewidth]{\Pic{png}{paper_Simple World_Performance_Smooth_line}}
   \vspace{\BeforeCaptionVSpace}
   \caption{Performance vs Time (Simple World)}
   \label{main:performance_1}
 \end{figure}
 
-\begin{figure}[!htbp]
+\begin{figure}[H]
   \centering
-  \includegraphics[width=.9\linewidth]{\Pic{png}{paper_Complex World_Performance_Smooth_line}}
+  \includegraphics[width=.8\linewidth]{\Pic{png}{paper_Complex World_Performance_Smooth_line}}
   \vspace{\BeforeCaptionVSpace}
   \caption{Performance vs Time (Complex World)}
   \label{main:performance_2}
@@ -256,17 +266,17 @@ In this section, we compare the performance of the 3 models. We measure performa
 
 ~\autoref{main:performance_3} and ~\autoref{main:performance_4} show that all 3 models display improvements in success rate at approximately equal rates. All 3 models also end up plateuing at the same success rate. Again, we observe that the \textit{Model with Jerk-Learning} generally outperforms the \textit{Model with Velocity Smoother}.
 
-\begin{figure}[!htbp]
+\begin{figure}[H]
   \centering
-  \includegraphics[width=.9\linewidth]{\Pic{png}{paper_Simple World_Success Rate_Smooth_line}}
+  \includegraphics[width=.8\linewidth]{\Pic{png}{paper_Simple World_Success Rate_Smooth_line}}
   \vspace{\BeforeCaptionVSpace}
   \caption{Success Rate vs Time (Simple World)}
   \label{main:performance_3}
 \end{figure}
 
-\begin{figure}[!htbp]
+\begin{figure}[H]
   \centering
-  \includegraphics[width=.9\linewidth]{\Pic{png}{paper_Complex World_Success Rate_Smooth_line}}
+  \includegraphics[width=.8\linewidth]{\Pic{png}{paper_Complex World_Success Rate_Smooth_line}}
   \vspace{\BeforeCaptionVSpace}
   \caption{Success Rate vs Time (Complex World)}
   \label{main:performance_4}
@@ -276,7 +286,7 @@ In this section, we compare the performance of the 3 models. We measure performa
 \label{main:subsec:motion}
 In this section, we compare the motion profiles of the 3 models. We do this by looking at histograms of linear and angular jerk for each model in each world.
 
-\begin{figure}[!htbp]
+\begin{figure}[H]
   \centering
   \includegraphics[width=.9\linewidth]{\Pic{png}{paper_simple_Linear Jerk_hist}}
   \vspace{\BeforeCaptionVSpace}
@@ -284,7 +294,7 @@ In this section, we compare the motion profiles of the 3 models. We do this by l
   \label{main:motion_1}
 \end{figure}
 
-\begin{figure}[!htbp]
+\begin{figure}[H]
   \centering
   \includegraphics[width=.9\linewidth]{\Pic{png}{paper_simple_Angular Jerk_hist}}
   \vspace{\BeforeCaptionVSpace}
@@ -292,7 +302,7 @@ In this section, we compare the motion profiles of the 3 models. We do this by l
   \label{main:motion_1}
 \end{figure}
 
-\begin{figure}[!ht]
+\begin{figure}[H]
   \centering
   \includegraphics[width=.9\linewidth]{\Pic{png}{paper_complex_Linear Jerk_hist}}
   \vspace{\BeforeCaptionVSpace}
@@ -300,7 +310,7 @@ In this section, we compare the motion profiles of the 3 models. We do this by l
   \label{main:motion_1}
 \end{figure}
 
-\begin{figure}[!htbp]
+\begin{figure}[H]
   \centering
   \includegraphics[width=.9\linewidth]{\Pic{png}{paper_complex_Angular Jerk_hist}}
   \vspace{\BeforeCaptionVSpace}
@@ -313,7 +323,7 @@ From ~\autoref{main:subsec:performance}, we observe that neither the velocity sm
 
 ~\autoref{main:subsec:motion} showed that the \textit{Model with Velocity Smoother} outperformed the other 2 models in terms of jerk reduction. The only cases where it seemed to (very) slightly underperform the \textit{Model with Jerk-Learning} were for linear jerk. We can understand why this is case when we look at the histograms of linear velocities:
 
-\begin{figure}[!ht]
+\begin{figure}[H]
   \centering
   \includegraphics[width=.9\linewidth]{\Pic{png}{paper_simple_Linear Velocity_hist}}
   \vspace{\BeforeCaptionVSpace}
@@ -321,7 +331,7 @@ From ~\autoref{main:subsec:performance}, we observe that neither the velocity sm
   \label{main:discussion:linear_velocity:simple}
 \end{figure}
 
-\begin{figure}[!ht]
+\begin{figure}[H]
   \centering
   \includegraphics[width=.9\linewidth]{\Pic{png}{paper_complex_Linear Velocity_hist}}
   \vspace{\BeforeCaptionVSpace}
@@ -329,9 +339,9 @@ From ~\autoref{main:subsec:performance}, we observe that neither the velocity sm
   \label{main:discussion:linear_velocity:complex}
 \end{figure}
 
-From ~\autoref{main:discussion:linear_velocity:simple} and ~\autoref{main:discussion:linear_velocity:complex} we see that to avoid generating any linear jerk the \textit{Model with Jerk-Learning} only produces the highest linear velocity possible in every state. That is, it avoids changes in velocities to avoid generating jerk. This is also the case for angular velocities:
+From ~\autoref{main:discussion:linear_velocity:simple} and ~\autoref{main:discussion:linear_velocity:complex} we see that to avoid generating any linear jerk the \textit{Model with Jerk-Learning} only produces the highest linear velocity possible in every state. That is, it avoids changes in velocities to avoid generating jerk. This is also the case for angular velocities as can be seen from ~\autoref{main:discussion:angular_velocity:simple} and ~\autoref{main:discussion:angular_velocity:complex}
 
-\begin{figure}[!ht]
+\begin{figure}[H]
   \centering
   \includegraphics[width=.9\linewidth]{\Pic{png}{paper_simple_Angular Velocity_hist}}
   \vspace{\BeforeCaptionVSpace}
@@ -339,7 +349,7 @@ From ~\autoref{main:discussion:linear_velocity:simple} and ~\autoref{main:discus
   \label{main:discussion:angular_velocity:simple}
 \end{figure}
 
-\begin{figure}[!ht]
+\begin{figure}[H]
   \centering
   \includegraphics[width=.9\linewidth]{\Pic{png}{paper_complex_Angular Velocity_hist}}
   \vspace{\BeforeCaptionVSpace}
