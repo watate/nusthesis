@@ -8,7 +8,7 @@
 The main contribution of this work is to test a learning-based approach to smoothing the motion profile of a DRL model. We do this in the following sequence:
 \begin{enumerate}
 \item Introduce smooth motion profiles
-\item Present the network architectures used to apply this learning-based approach
+\item Present the network architecture used to apply this learning-based approach
 \item Discuss the empirical findings of this learning-based approach as well as compare it with a non-learning based approach
 \end{enumerate}
 
@@ -133,7 +133,7 @@ The network architecture we use is largely similar to Xie et. al's Assisted DDPG
 
 The network architecture of ~\autoref{main:fig:network_architecture} consists of two parts:
 \begin{enumerate}
-\item \textbf{Policy network and assistive controller (red)}: The policy network consists of a fully-connected layers which estimates the optimal linear and angular velocities for the robot based only on the input state (i.e., laser scans, current speed, and target position in the local frame). This is a very important feature of DDPG as sampling actions from a policy is computationally less expensive than exhaustively evaluating as many discrete actions as possible (since our action space is continuous). Note that the activation functions of the outputs of the policy are sigmoid (linear velocity) and tanh (angular velocity), respectively. 
+\item \textbf{Policy network and assistive controller (red)}: The policy network consists of a fully-connected layers which estimates the optimal linear and angular velocities for the robot based only on the input state (i.e., laser scans, current speed, and target position in the local frame). This is a very important feature of DDPG as sampling actions from a policy is computationally less expensive than exhaustively evaluating as many discrete actions as possible (since our action space is continuous). Note that the activation functions of the outputs of the policy are sigmoid (linear velocity) and tanh (angular velocity), respectively. The assisive controller is an alternative, switchable policy used to speed up training of the model. It is only used to speed up training, and is discarded eventually.
 \item \textbf{Augmented critic network (green)}: The critic-DQN is also constructed with fully-connected layers. It has two branches: one is the critic branch where the action is concatenated into the second layer; the other is the DQN branch where (similar to Xie et. al~\cite{xie_learning_2018}) we apply dueling and double network architecture to speed up training and avoid overestimation. Note that there is no nonlinear activation for its output layers.
 \end{enumerate}
 
@@ -175,8 +175,8 @@ Initialize replay buffer $R$ and exploration noise $\epsilon$\;
     \If{$\sigma_t == 1$}{Sample policy action $a_t = \pi(s_t|\theta^\pi) + \epsilon$}
     \Else{Sample action $a_t$ from external controller}
     Execute $a_t$ and obtain $r_t, s_{t+1}$\;
-    Store transition ($s_t, a_t, r_t, s_{t+1}, \sigma_t$) in R\;
-    Sample N transitions ($s_i, a_i, r_i, s_{i+1}, \sigma_i$) in R\;
+    Store transition ($s_t, a_t, r_t, s_{t+1}, \sigma_t$) in $R$\;
+    Sample N transitions ($s_i, a_i, r_i, s_{i+1}, \sigma_i$) in $R$\;
     Optimize critic-DQN by minimizing loss function\;
     Update policy\;
     Update target networks\;
@@ -198,11 +198,11 @@ In this section, we discuss and compare the results of training the 3 different 
   \centering
   \includegraphics[width=.9\linewidth]{\Pic{png}{paper_Simple World_Performance_Raw_line}}
   \vspace{\BeforeCaptionVSpace}
-  \caption{Graph of Performance vs Time (Raw).}
+  \caption{Graph of Performance vs Training Episodes (Raw).}
   \label{main:visualization_difficulty_1}
 \end{figure}
 
-It is difficult to see how well the model is performing over time from ~\autoref{main:visualization_difficulty_1} purely based on the raw results. Therefore, we have chosen to use an exponentially weighted moving average (EWMA) to better visualize how the agent's performance is improving over time (as well as other variables which we will look at in this work). EWMA is calculated as follows:
+It is difficult to see how well the model is performing over training episodes from ~\autoref{main:visualization_difficulty_1} purely based on the raw results. Therefore, we have chosen to use an exponentially weighted moving average (EWMA) to better visualize how the agent's performance is improving over time (as well as other variables which we will look at in this work). EWMA is calculated as follows:
 \begin{equation}
 y(t) = \frac{x_t + (1-\alpha_{EWMA})x_{t-1} + (1-\alpha_{EWMA})^{2}x_{t-2} + ... + (1-\alpha_{EWMA})^{t}x_0}{1 + (1-\alpha_{EWMA}) + (1-\alpha_{EWMA}^2) + ... + (1-\alpha_{EWMA})^t}
 \end{equation}
@@ -220,13 +220,13 @@ While it is possible to pass $\alpha_{EWMA}$ directly, it's often easier to thin
 \end{equation}
 
 
-Using EWMA, our graph of performance vs time is now smoothened and we are able to see the long-term trends:
+Using EWMA, our graph of performance vs training episodes is now smoothened and we are able to see the long-term trends:
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=.9\linewidth]{\Pic{png}{paper_Simple World_Performance_Smooth_line}}
   \vspace{\BeforeCaptionVSpace}
-  \caption{Graph of Performance vs Time (Smooth).}
+  \caption{Graph of Performance vs Training Episodes (Smooth).}
   \label{main:visualization_difficulty_2}
 \end{figure}
 
@@ -252,7 +252,7 @@ In this section, we compare the performance of the 3 models. We measure performa
   \centering
   \includegraphics[width=.8\linewidth]{\Pic{png}{paper_Simple World_Performance_Smooth_line}}
   \vspace{\BeforeCaptionVSpace}
-  \caption{Performance vs Time (Simple World)}
+  \caption{Performance vs Training Episodes (Simple World)}
   \label{main:performance_1}
 \end{figure}
 
@@ -260,7 +260,7 @@ In this section, we compare the performance of the 3 models. We measure performa
   \centering
   \includegraphics[width=.8\linewidth]{\Pic{png}{paper_Complex World_Performance_Smooth_line}}
   \vspace{\BeforeCaptionVSpace}
-  \caption{Performance vs Time (Complex World)}
+  \caption{Performance vs Training Episodes (Complex World)}
   \label{main:performance_2}
 \end{figure}
 
@@ -270,7 +270,7 @@ In this section, we compare the performance of the 3 models. We measure performa
   \centering
   \includegraphics[width=.8\linewidth]{\Pic{png}{paper_Simple World_Success Rate_Smooth_line}}
   \vspace{\BeforeCaptionVSpace}
-  \caption{Success Rate vs Time (Simple World)}
+  \caption{Success Rate vs Training Episodes (Simple World)}
   \label{main:performance_3}
 \end{figure}
 
@@ -278,7 +278,7 @@ In this section, we compare the performance of the 3 models. We measure performa
   \centering
   \includegraphics[width=.8\linewidth]{\Pic{png}{paper_Complex World_Success Rate_Smooth_line}}
   \vspace{\BeforeCaptionVSpace}
-  \caption{Success Rate vs Time (Complex World)}
+  \caption{Success Rate vs Training Episodes (Complex World)}
   \label{main:performance_4}
 \end{figure}
 
