@@ -7,7 +7,15 @@ In this work, we proposed an approach to smoothing the motion profile of a robot
 
 While hard coding the mechanical limitations of the robot may improve the smoothness of the motion profile of the robot, it does have a number of limitations. First, this assumes that the programmer understands what those limitations are in the first place. Secondly, the effort to generate and test the limitations of the robot may be non-trivial. Thirdly, hard coding the limitations of the robot may not necessarily lead to a smoother motion profile (however, in this scenario it happens to work).
 
+\section{Practical Implications}
+What does this report tell us about how to smooth the motion of an agent/robot? I propose the following:
+\begin{enumerate}
+\item \textbf{If motion smoothing is a secondary goal}: Add a velocity smoother at the final layer, or figure out a way to include the limitations of the robot into the simulation environment. This will enable a fairly smooth motion profile which should eliminate the worst case scenario of the robot only choosing extreme actions
+\item \textbf{If end-to-end motion smoothing is a primary goal}: Consider the potential future research directions discussed in~\autoref{concl:sec:directions} which would improve on the learning-based approach proposed in this report
+\end{enumerate}
+
 \section{Future Research Directions}
+\label{concl:sec:directions}
 Many open problems remain, which relate to and could build on this thesis work. Below, we describe some of the frontiers (which we consider) to be the most exciting.
 
 \subsection{Inverse Reinforcement Learning}
@@ -18,6 +26,9 @@ The idea behind exploration is to allow the agent to experience unfamiliar parts
 
 \subsection{Prioritized Experience Replay}
 Experience replay lets DRL agents remember and reuse trajectories from the past. In this work, experience transitions were uniformly sampled from a replay buffer without considering their significance. Prioritizing specific experiences can be utilized to replay important transitions more frequently and learn more efficiently~\cite{schaul_prioritized_2016}
+
+\subsection{Reinforced Imitation}
+Leveraging on prior expert demonstrations of smooth motion profiles for pre-training can reduce the training time and possibly allow the policy to learn a smooth motion profile (e.g. trapezoidal or s-curve)~\cite{pfeiffer_reinforced_2018}. Given that highly optimized motion profiles for robots are already well-known~\cite{meckl_optimized_1998}, there is no need to use reinforcement learning to reinvent the wheel (i.e. RL is generally more useful for multi-modal problems, not problems like motion smoothing where we can already fairly agree on the optimal behaviour).
 
 \vspace{2em}
 We believe the above (but not limited to) future research directions will advance the technology presented in this thesis and contribute to academia and industry.
