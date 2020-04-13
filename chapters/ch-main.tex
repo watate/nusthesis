@@ -66,8 +66,8 @@ For all 3 models, the output (action) is a linear velocity ($v_t$) and an angula
 \begin{algorithm}[H]
 \caption{Simple Velocity Smoother}
 \label{main:simple_v_smoother}
-\If{Target Velocity < Control Velocity}{Control Velocity = $\min$(Target Velocity, Control Velocity + $v_c$)}
-\ElseIf{Target Velocity > Control Velocity}{Control Velocity = $\max$(Target Velocity, Control Velocity - $v_c$)}
+\If{Target Velocity > Control Velocity}{Control Velocity = $\min$(Target Velocity, Control Velocity + $v_c$)}
+\ElseIf{Target Velocity < Control Velocity}{Control Velocity = $\max$(Target Velocity, Control Velocity - $v_c$)}
 \Else{Control Velocity = Target Velocity}
 \end{algorithm}
 Where:
